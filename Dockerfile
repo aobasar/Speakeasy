@@ -27,5 +27,10 @@ RUN npm ci --omit=dev --silent \
 COPY app app
 COPY public public
 
+# Health check: app is healthy when /brand (no-auth config endpoint) responds 200.
+# Lets Coolify keep the old container running if a new deploy never becomes healthy.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
+    CMD wget -qO- "http://127.0.0.1:${PORT:-3000}/brand" >/dev/null 2>&1 || exit 1
+
 # Set default command to start the application
 CMD ["npm", "start"]
