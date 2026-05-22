@@ -3216,7 +3216,8 @@ ul.pricing-item-features-list li {
     height: 1024px;
     /* background-image: url(../images/illustration-section-01.svg); */
     /* background-image: url(../images/bg.svg); */
-    background-image: url(../images/header.png);
+    /* background-image: url(../images/header.png); */
+    background-image: none;
     background-repeat: no-repeat;
     background-size: cover; /*auto*/
     left: 50%;

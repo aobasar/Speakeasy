@@ -71,7 +71,7 @@ let brand = {
         newCallRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
         newCallRoomDescription:
             "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
-        loginTitle: 'MiroTalk - Host Protected login required.',
+        loginTitle: 'Speakeasy - members only',
         loginHeading: 'Welcome back',
         loginDescription: 'Enter your credentials to continue.',
         loginButtonLabel: 'Login',

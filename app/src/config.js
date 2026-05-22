@@ -293,7 +293,7 @@ module.exports = {
             newCallRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
             newCallRoomDescription:
                 "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
-            loginTitle: 'Speakeasy - Host Protected login required.',
+            loginTitle: 'Speakeasy - members only',
             loginHeading: 'Speakeasy',
             loginDescription: 'Knock twice — it stays between us.',
             loginButtonLabel: 'Login',

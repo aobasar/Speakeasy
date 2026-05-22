@@ -91,8 +91,9 @@ body.aob-auth {
 .aob-auth .login-title,
 .aob-auth .join-room-title {
     margin: 0 0 4px;
-    font-size: 22px;
-    font-weight: 600;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 24px;
+    font-weight: 700;
     letter-spacing: 0.3px;
     color: #D4AF37;
 }

@@ -63,3 +63,8 @@ label:hover i[class*='fa-'] {
 .navbar {
     background: linear-gradient(rgba(0, 0, 0, 0.58), transparent 69.75%);
 }
+
+/* Başlık/marka fontu (Playfair Display) — modal başlıkları */
+.swal2-title {
+    font-family: 'Playfair Display', Georgia, serif !important;
+}
