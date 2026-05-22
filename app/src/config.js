@@ -268,8 +268,8 @@ module.exports = {
         htmlInjection: true,
         app: {
             language: 'en', // https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
-            name: 'AOB Speakeasy',
-            title: '<h1>AOB Speakeasy</h1>Private, secure video meetings.<br />Stay between us.',
+            name: 'Speakeasy',
+            title: '<h1>Speakeasy</h1>Private, secure video meetings.<br />Stay between us.',
             description:
                 'Start your private meeting with a single click. No download, plug-in, or login required — just talk, share, and stay between us.',
             joinDescription: 'Pick a room name.<br />How about this one?',
@@ -279,31 +279,31 @@ module.exports = {
         },
         og: {
             type: 'app-webrtc',
-            siteName: 'AOB Speakeasy',
+            siteName: 'Speakeasy',
             title: 'Click the link to join the meeting.',
-            description: 'AOB Speakeasy — secure, private video meetings.',
+            description: 'Speakeasy — secure, private video meetings.',
             image: 'https://speakeasy.aobprojects.com/images/preview.png',
             url: 'https://speakeasy.aobprojects.com',
         },
         site: {
-            shortcutIcon: '../images/logo.svg',
-            appleTouchIcon: '../images/logo.svg',
-            landingTitle: 'AOB Speakeasy a Free Secure Video Calls, Chat & Screen Sharing.',
-            newCallTitle: 'AOB Speakeasy a Free Secure Video Calls, Chat & Screen Sharing.',
+            shortcutIcon: '../images/favicon.png',
+            appleTouchIcon: '../images/logo.png',
+            landingTitle: 'Speakeasy a Free Secure Video Calls, Chat & Screen Sharing.',
+            newCallTitle: 'Speakeasy a Free Secure Video Calls, Chat & Screen Sharing.',
             newCallRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
             newCallRoomDescription:
                 "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
-            loginTitle: 'AOB Speakeasy - Host Protected login required.',
-            loginHeading: 'Welcome back',
-            loginDescription: 'Enter your credentials to continue.',
+            loginTitle: 'Speakeasy - Host Protected login required.',
+            loginHeading: 'Speakeasy',
+            loginDescription: 'Knock twice — it stays between us.',
             loginButtonLabel: 'Login',
-            joinRoomTitle: 'Pick name.<br />Share URL.<br />Start conference.',
+            joinRoomTitle: 'Name your hideout.<br />Pass the word.<br />Let them in.',
             joinRoomButtonLabel: 'JOIN ROOM',
-            clientTitle: 'AOB Speakeasy WebRTC Video call, Chat Room & Screen Sharing.',
-            privacyPolicyTitle: 'AOB Speakeasy - privacy and policy.',
+            clientTitle: 'Speakeasy WebRTC Video call, Chat Room & Screen Sharing.',
+            privacyPolicyTitle: 'Speakeasy - privacy and policy.',
             stunTurnTitle: 'Test Stun/Turn Servers.',
-            notFoundTitle: 'AOB Speakeasy - 404 Page not found.',
-            waitingRoomTitle: 'AOB Speakeasy - Waiting for host to start the meeting',
+            notFoundTitle: 'Speakeasy - 404 Page not found.',
+            waitingRoomTitle: 'Speakeasy - Waiting for host to start the meeting',
             waitingRoomHeading: 'Waiting for host...',
             waitingRoomDescription:
                 "The meeting hasn't started yet.<br />You'll join automatically when the host opens the room.",
@@ -402,7 +402,7 @@ module.exports = {
      * only need to specify the properties you want to change.
      */
     themes: {
-        // AOB Speakeasy — koyu + amber/altın (varsayılan "dark" temasını eziyoruz)
+        // Speakeasy — koyu + amber/altın (varsayılan "dark" temasını eziyoruz)
         dark: {
             '--body-bg': 'radial-gradient(#1E1A15, #14110E)',
             '--msger-bg': 'radial-gradient(#1E1A15, #14110E)',

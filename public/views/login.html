@@ -4,8 +4,8 @@
         <!-- Title and Icon -->
 
         <title id="loginTitle">MiroTalk - Host Protected login required.</title>
-        <link id="shortcutIcon" rel="shortcut icon" href="../images/logo.svg" />
-        <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.svg" />
+        <link id="shortcutIcon" rel="shortcut icon" href="../images/favicon.png" />
+        <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.png" />
 
         <!-- Meta Information -->
 
@@ -35,6 +35,7 @@
         <link rel="stylesheet" href="../css/landing.css" />
         <link rel="stylesheet" href="../css/login.css" />
         <link rel="stylesheet" href="../css/translate.css" />
+        <link rel="stylesheet" href="../css/aob-login.css" />
 
         <!-- Js scripts -->
 
@@ -53,7 +54,7 @@
         <!-- sweetalert -->
         <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8"></script>
     </head>
-    <body class="has-animations">
+    <body class="has-animations aob-auth">
         <div id="google_translate_element"></div>
 
         <div class="body-wrap">
@@ -67,7 +68,7 @@
                 </div>
             </header>
             <main class="site-content mt-32">
-                <section class="hero section illustration-section-01">
+                <section class="hero section">
                     <div class="container">
                         <div class="hero-inner section-inner">
                             <div class="split-wrap invert-mobile">
@@ -81,11 +82,11 @@
                                             aria-label="Login"
                                         >
                                             <div class="login-icon">
-                                                <i class="fa-solid fa-lock"></i>
+                                                <img src="../images/logo.png" alt="Speakeasy" />
                                             </div>
-                                            <h2 id="loginHeading" class="login-title">Welcome back</h2>
+                                            <h2 id="loginHeading" class="login-title">Speakeasy</h2>
                                             <p id="loginDescription" class="login-description">
-                                                Enter your credentials to continue.
+                                                Knock twice &mdash; it stays between us.
                                             </p>
                                             <div class="login-input-group">
                                                 <i class="fa-solid fa-user"></i>
@@ -121,9 +122,9 @@
                                                 <i class="fa-solid fa-video"></i>
                                             </div>
                                             <h2 id="joinRoomTitle" class="join-room-title">
-                                                Pick name.<br />
-                                                Share URL.<br />
-                                                Start conference.
+                                                Name your hideout.<br />
+                                                Pass the word.<br />
+                                                Let them in.
                                             </h2>
                                             <div class="room-input-row">
                                                 <div class="login-input-group">
@@ -165,22 +166,18 @@
                 </section>
             </main>
 
-            <footer id="footer" class="site-footer center-content-mobile">
+            <footer id="footer" class="site-footer" style="text-align:center;">
                 <div class="container">
-                    <div class="site-footer-inner">
-                        <div class="footer-bottom space-between text-xxs">
-                            <div class="footer-copyright">
-                                @AOBASAR &mdash; made with &#10084;&#65039; San Diego, CA
-                                &middot;
-                                <a href="https://github.com/aobasar/mirotalk" target="_blank" rel="noopener">Source</a>
-                            </div>
-                        </div>
+                    <div class="footer-copyright" style="text-align:center;padding:14px 0;font-size:12px;">
+                        @AOBASAR &mdash; made with &#10084;&#65039; San Diego, CA
+                        <a href="https://github.com/aobasar/mirotalk" target="_blank" rel="noopener" style="opacity:0.16;">&middot; Source</a>
                     </div>
                 </div>
             </footer>
         </div>
 
         <script defer src="../js/utils.js"></script>
+        <script defer src="../js/aob-rooms.js"></script>
         <script defer src="../js/login.js"></script>
         <script defer src="../js/brand.js"></script>
         <script defer src="../js/landing.js"></script>

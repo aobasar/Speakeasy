@@ -183,7 +183,8 @@ function showJoinRoomForm() {
     if (randomRoomButton) {
         randomRoomButton.onclick = (e) => {
             e.preventDefault();
-            if (roomNameInput) roomNameInput.value = getUUID4();
+            if (roomNameInput)
+                roomNameInput.value = typeof aobRandomRoom === 'function' ? aobRandomRoom() : getUUID4();
         };
     }
     if (shareRoomButton) {

@@ -1,0 +1,323 @@
+/* ==========================================================================
+   AOB Speakeasy — minimal, compact, responsive login
+   Scoped under body.aob-auth so it only affects the login page.
+   Loaded last, so it overrides landing.css / login.css.
+   ========================================================================== */
+
+body.aob-auth {
+    margin: 0;
+    min-height: 100vh;
+    font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
+    color: #EDE6D6;
+    background:
+        radial-gradient(1100px 520px at 50% -8%, rgba(212, 175, 55, 0.14), transparent 62%),
+        linear-gradient(160deg, #1E1A15 0%, #14110E 60%, #100D0A 100%);
+    background-attachment: fixed;
+}
+
+/* Kill the busy landing chrome */
+.aob-auth .site-header,
+.aob-auth #google_translate_element {
+    display: none !important;
+}
+
+/* Flatten the nested landing wrappers */
+.aob-auth .body-wrap {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+.aob-auth .site-content {
+    margin: 0 !important;
+    padding: 24px 16px !important;
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.aob-auth .hero,
+.aob-auth .section,
+.aob-auth .hero-inner,
+.aob-auth .container,
+.aob-auth .section-inner,
+.aob-auth .split-wrap,
+.aob-auth .split-item,
+.aob-auth .hero-content {
+    all: revert;
+    margin: 0 !important;
+    padding: 0 !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    width: auto !important;
+    display: block !important;
+    background: none !important;
+}
+
+/* The card */
+.aob-auth .login-card {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto !important;
+    padding: 34px 28px 30px;
+    background: rgba(30, 26, 21, 0.92);
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(6px);
+    text-align: center;
+    opacity: 1 !important;
+    transform: none !important;
+}
+
+/* Lock icon badge */
+.aob-auth .login-icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(212, 175, 55, 0.12);
+    border: 1px solid rgba(212, 175, 55, 0.35);
+}
+.aob-auth .login-icon i {
+    font-size: 22px;
+    color: #D4AF37;
+}
+
+/* Titles */
+.aob-auth .login-title,
+.aob-auth .join-room-title {
+    margin: 0 0 4px;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    color: #D4AF37;
+}
+.aob-auth .login-description {
+    margin: 0 0 22px;
+    font-size: 13px;
+    line-height: 1.4;
+    color: #A89B82;
+    text-wrap: balance; /* dar ekranda sararsa dengeli sarsın */
+}
+
+/* Inputs */
+.aob-auth .login-input-group {
+    position: relative;
+    margin-bottom: 14px;
+    text-align: left;
+}
+.aob-auth .login-input-group > i:not(.toggle-password) {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8C8064;
+    font-size: 14px;
+    pointer-events: none;
+}
+.aob-auth .form-input {
+    width: 100%;
+    box-sizing: border-box;
+    height: 46px;
+    padding: 0 42px;
+    background: #14110E;
+    border: 1px solid rgba(212, 175, 55, 0.16);
+    border-radius: 11px;
+    color: #EDE6D6;
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+.aob-auth .form-input::placeholder {
+    color: #6E6552;
+}
+.aob-auth .form-input:focus {
+    border-color: #D4AF37;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+.aob-auth .toggle-password {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #8C8064;
+    font-size: 14px;
+    cursor: pointer;
+}
+.aob-auth .toggle-password:hover {
+    color: #D4AF37;
+}
+
+/* Buttons */
+.aob-auth .login-btn,
+.aob-auth .join-room-btn {
+    width: 100%;
+    height: 46px;
+    margin-top: 6px;
+    border: none;
+    border-radius: 11px;
+    background: #D4AF37;
+    color: #14110E;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s, transform 0.05s;
+}
+.aob-auth .login-btn:hover,
+.aob-auth .join-room-btn:hover {
+    filter: brightness(1.08);
+}
+.aob-auth .login-btn:active,
+.aob-auth .join-room-btn:active {
+    transform: translateY(1px);
+}
+
+/* Inline error injected by login.js */
+.aob-auth .login-error {
+    margin: 0 0 12px;
+    color: #E5928A;
+    font-size: 13px;
+}
+
+/* Post-login room picker row */
+.aob-auth .room-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.aob-auth .room-input-row .login-input-group {
+    flex: 1 1 auto;
+    margin-bottom: 16px;
+}
+.aob-auth .random-room-btn,
+.aob-auth .share-room-btn {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 46px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    border-radius: 11px;
+    background: #14110E;
+    color: #D4AF37;
+    cursor: pointer;
+}
+
+/* Footer */
+.aob-auth .site-footer {
+    flex: 0 0 auto;
+    padding: 16px;
+    text-align: center;
+}
+.aob-auth .site-footer .footer-copyright {
+    color: #6E6552;
+    font-size: 12px;
+}
+.aob-auth .site-footer a {
+    color: #A89B82;
+    text-decoration: none;
+}
+.aob-auth .site-footer a:hover {
+    color: #D4AF37;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .aob-auth .login-card {
+        max-width: 100%;
+        padding: 28px 20px 24px;
+        border-radius: 16px;
+    }
+    .aob-auth .site-content {
+        padding: 16px 12px !important;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Override login.css blue accents -> amber, and show logo image as the icon
+   -------------------------------------------------------------------------- */
+.aob-auth .login-card .form-input:hover {
+    border-color: rgba(212, 175, 55, 0.45);
+    background: #14110E;
+}
+.aob-auth .login-card .form-input:focus {
+    border-color: #D4AF37;
+    background: #14110E;
+    box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.15);
+}
+.aob-auth .login-input-group:focus-within i:not(.toggle-password) {
+    color: #D4AF37;
+}
+.aob-auth .login-card .login-btn,
+.aob-auth .login-card .join-room-btn {
+    background: #D4AF37;
+    box-shadow: none;
+}
+.aob-auth .login-card .login-btn:hover,
+.aob-auth .login-card .join-room-btn:hover {
+    box-shadow: 0 6px 18px rgba(212, 175, 55, 0.30);
+    filter: brightness(1.08);
+}
+
+/* Logo image instead of the lock badge */
+.aob-auth .login-icon {
+    background: none;
+    border: none;
+    width: auto;
+    height: auto;
+    margin-bottom: 14px;
+}
+.aob-auth .login-icon img {
+    width: 100%;
+    max-width: 260px;
+    height: auto;
+    object-fit: contain;
+}
+
+/* Logo zaten "Speakeasy" yazısını içerdiği için başlık/açıklamayı gizle */
+.aob-auth #loginForm #loginHeading,
+.aob-auth #loginForm #loginDescription {
+    display: none;
+}
+
+/* Pill kart + amber glow hover + dar pill buton */
+.aob-auth #loginForm {
+    border-radius: 1000px;
+    transition: box-shadow 0.3s, border-color 0.3s;
+}
+.aob-auth #loginForm:hover,
+.aob-auth #loginForm:focus-within {
+    box-shadow: 0 12px 45px -2px rgba(249, 225, 70, 0.25);
+    border-color: #f9b537;
+}
+.aob-auth .login-btn,
+.aob-auth .join-room-btn {
+    border-radius: 1000px;
+    width: 60%;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Pill input alanları */
+.aob-auth .form-input {
+    border-radius: 100px !important;
+}
+
+/* Giriş sonrası oda formu (joinRoomForm) — pill + amber glow */
+.aob-auth #joinRoomForm.login-card {
+    border-radius: 100px !important;
+}
+.aob-auth #joinRoomForm:focus-within,
+.aob-auth #joinRoomForm:hover {
+    border-color: #f9e037;
+}
+.aob-auth #joinRoomForm #joinSelectRoomButton {
+    border-radius: 100px;
+}
+.aob-auth .share-room-modal-highlight {
+    color: rgb(224, 195, 2);
+}

@@ -1302,7 +1302,17 @@ function getPeerAvatar() {
             console.log('Restored avatar from localStorage', { avatar: saved });
             return saved;
         }
-        return false;
+        // AOB Speakeasy — assign a random DiceBear "croodles-neutral" avatar and persist it
+        const seed = Math.random().toString(36).substring(2, 10);
+        const randomAvatar = `https://api.dicebear.com/9.x/croodles-neutral/svg?seed=${encodeURIComponent(seed)}`;
+        try {
+            lsSettings.peer_avatar = randomAvatar;
+            lS.setSettings(lsSettings);
+        } catch (e) {
+            console.warn('Could not persist random avatar', e);
+        }
+        console.log('Assigned random avatar', { avatar: randomAvatar });
+        return randomAvatar;
     }
     return avatar;
 }
@@ -2024,6 +2034,27 @@ async function whoAreYou() {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         willOpen: () => {
             elemDisplay(loadingDiv, false);
+        },
+        didOpen: () => {
+            // AOB Speakeasy — "Keep my name secret": funny alias, regenerates on each click
+            const input = Swal.getInput();
+            if (!input || typeof aobSecretName !== 'function') return;
+            if (document.getElementById('aobSecretNameBtn')) return;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.id = 'aobSecretNameBtn';
+            btn.innerHTML = '🎭 Keep my name secret';
+            btn.style.cssText =
+                'margin:10px auto 0;display:block;padding:8px 14px;border:1px solid rgba(212,175,55,0.45);' +
+                'border-radius:10px;background:transparent;color:#D4AF37;font-size:13px;cursor:pointer;';
+            btn.onmouseenter = () => (btn.style.background = 'rgba(212,175,55,0.12)');
+            btn.onmouseleave = () => (btn.style.background = 'transparent');
+            btn.onclick = () => {
+                input.value = aobSecretName();
+                input.dispatchEvent(new Event('input'));
+                input.focus();
+            };
+            input.insertAdjacentElement('afterend', btn);
         },
         inputValidator: async (value) => {
             if (!value) return 'Please enter your email or name';
@@ -7326,6 +7357,16 @@ function setMySettingsBtn() {
     myPeerNameSetBtn.addEventListener('click', (e) => {
         updateMyPeerName();
     });
+    // AOB Speakeasy — fill a random funny alias
+    const myPeerNameRandomBtn = getId('myPeerNameRandomBtn');
+    if (myPeerNameRandomBtn) {
+        myPeerNameRandomBtn.addEventListener('click', () => {
+            if (typeof aobSecretName === 'function') {
+                myPeerNameSet.value = aobSecretName();
+                myPeerNameSet.focus();
+            }
+        });
+    }
     myProfileAvatarUploadBtn.addEventListener('click', async () => {
         await updateMyPeerAvatarByUrl();
     });
@@ -8544,10 +8585,10 @@ function shareRoomByEmail() {
             const roomURL = getRoomURL();
             const newLine = '%0D%0A%0D%0A';
             const selectedDateTime = document.getElementById('datetimePicker').value;
-            const roomPassword = isRoomLocked && thisRoomPassword ? 'Password: ' + thisRoomPassword + newLine : '';
+            const roomPassword = isRoomLocked && thisRoomPassword ? `Tonight's word at the door: ` + thisRoomPassword + newLine : '';
             const email = '';
-            const emailSubject = `Please join our MiroTalk P2P Video Chat Meeting`;
-            const emailBody = `The meeting is scheduled at: ${newLine} DateTime: ${selectedDateTime} ${newLine}${roomPassword}Click to join: ${roomURL} ${newLine}`;
+            const emailSubject = `Psst... you're on the list tonight`;
+            const emailBody = `Word on the street is you've got good taste in company. We're cracking the back door of the Speakeasy just for you - slip in and grab a stool.${newLine}When: ${selectedDateTime}${newLine}${roomPassword}Sneak in here: ${roomURL}${newLine}Act natural. What happens at the Speakeasy, stays at the Speakeasy.`;
             document.location = 'mailto:' + email + '?subject=' + emailSubject + '&body=' + emailBody;
         },
     });
@@ -12427,39 +12468,17 @@ async function updateMyPeerAvatarByUrl() {
                 return img;
             }
 
-            // Self-hosted avatars
-            const localLabel = document.createElement('p');
-            localLabel.textContent = 'Pick an avatar:';
-            localLabel.style.cssText = 'color:#aaa;font-size:12px;margin:10px 0 6px;text-align:center;';
-
-            const localGrid = document.createElement('div');
-            localGrid.style.cssText =
-                'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-height:120px;overflow-y:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:4px 2px;margin-bottom:4px;';
-            localGrid.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
-
-            for (let i = 1; i <= 25; i++) {
-                const url = `${window.location.origin}/images/avatars/avatar_${String(i).padStart(2, '0')}.png`;
-                localGrid.appendChild(makeAvatarImg(url));
-            }
-
-            // DiceBear random avatars
+            // AOB Speakeasy — only DiceBear "croodles-neutral" avatars (no self-hosted set)
             const randomAvatarLabel = document.createElement('p');
-            randomAvatarLabel.textContent = 'Or pick a random avatar:';
+            randomAvatarLabel.textContent = 'Pick your avatar:';
             randomAvatarLabel.style.cssText = 'color:#aaa;font-size:12px;margin:10px 0 6px;text-align:center;';
 
             const randomAvatarGrid = document.createElement('div');
             randomAvatarGrid.style.cssText =
                 'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:4px;';
-            const dicebearStyles = [
-                'bottts-neutral',
-                'adventurer-neutral',
-                'thumbs',
-                'initials',
-                'identicon',
-                'shapes',
-            ];
+            const dicebearStyles = ['croodles-neutral'];
 
-            for (let i = 0; i < 6; i++) {
+            for (let i = 0; i < 12; i++) {
                 const seed = Math.random().toString(36).substring(2, 10);
                 const style = dicebearStyles[i % dicebearStyles.length];
                 const url = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}`;
@@ -12467,7 +12486,7 @@ async function updateMyPeerAvatarByUrl() {
             }
 
             let insertAfter = input;
-            for (const el of [localLabel, localGrid, randomAvatarLabel, randomAvatarGrid]) {
+            for (const el of [randomAvatarLabel, randomAvatarGrid]) {
                 insertAfter.parentNode.insertBefore(el, insertAfter.nextSibling);
                 insertAfter = el;
             }

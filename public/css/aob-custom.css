@@ -1,0 +1,65 @@
+/* ==========================================================================
+   AOB Speakeasy — global custom overrides (SweetAlert2 vb.)
+   Upstream'de olmayan dosya → çakışmasız.
+   ========================================================================== */
+
+/* SweetAlert onay butonu (örn. "Join meeting") — amber/altın */
+.swal2-styled.swal2-confirm {
+    background-color: #9e8500 !important;
+}
+.swal2-styled.swal2-confirm:hover {
+    background-color: #b89a0a !important;
+}
+.swal2-styled.swal2-confirm:focus {
+    box-shadow: 0 0 0 3px rgba(158, 133, 0, 0.4) !important;
+}
+
+/* ==========================================================================
+   İkon renk/efekt teması (Font Awesome) — yumuşak geçiş + hover amber glow
+   Taban renkleri tema değişkenlerinden gelir; burada sadece etkileşim efekti.
+   ========================================================================== */
+i[class*='fa-'],
+.fas,
+.far,
+.fa-solid,
+.fa-regular {
+    transition: transform 0.15s ease, color 0.15s ease, text-shadow 0.15s ease;
+}
+
+/* Tıklanabilir öğelerin üzerine gelince ikon amber parlasın ve hafif büyüsün */
+button:hover i[class*='fa-'],
+a:hover i[class*='fa-'],
+[role='button']:hover i[class*='fa-'],
+label:hover i[class*='fa-'] {
+    color: #D4AF37;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.6);
+    transform: scale(1.12);
+}
+
+/* Yükleme spinner'ı — logo ~256px, halka etrafında orantılı dönsün */
+.loading-spinner {
+    width: 300px !important;
+    height: 300px !important;
+}
+.spinner-logo {
+    width: auto !important;
+    height: 256px !important;
+}
+
+/* Alt buton barı + navbar */
+#bottomButtons button {
+    width: 40px;
+    height: 40px;
+    padding: 5px;
+    font-size: 1.2rem;
+}
+#bottomButtons .device-dropdown-toggle {
+    width: 25px;
+    height: 40px;
+}
+#bottomButtons {
+    background: black;
+}
+.navbar {
+    background: linear-gradient(rgba(0, 0, 0, 0.58), transparent 69.75%);
+}

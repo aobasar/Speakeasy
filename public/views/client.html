@@ -4,8 +4,8 @@
         <!-- Title and Icon -->
 
         <title id="clientTitle">MiroTalk WebRTC Video call, Chat Room & Screen Sharing.</title>
-        <link id="icon" rel="shortcut icon" href="../images/logo.svg" />
-        <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.svg" />
+        <link id="icon" rel="shortcut icon" href="../images/favicon.png" />
+        <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.png" />
 
         <!-- Meta Information -->
 
@@ -35,6 +35,7 @@
         <link rel="stylesheet" href="../css/client.css" />
         <link rel="stylesheet" href="../css/videoGrid.css" />
         <link rel="stylesheet" href="../css/whiteboard.css" />
+        <link rel="stylesheet" href="../css/aob-custom.css" />
 
         <!-- https://cdnjs.com/libraries/font-awesome -->
 
@@ -101,7 +102,7 @@
         <div id="loadingDiv" class="center">
             <div class="loading-spinner">
                 <div class="spinner-ring"></div>
-                <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+                <img class="spinner-logo" src="../images/logo.png" alt="logo" />
             </div>
             <h1>Loading</h1>
             <pre>
@@ -125,7 +126,7 @@ access to use this app.
                 <div id="initVideoLoader" class="init-video-loader">
                     <div class="loading-spinner">
                         <div class="spinner-ring"></div>
-                        <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+                        <img class="spinner-logo" src="../images/logo.png" alt="logo" />
                     </div>
                 </div>
                 <video id="initVideo" playsinline="true" autoplay="" class="mirror"></video>
@@ -1081,6 +1082,7 @@ access to use this app.
                             <br /><br />
                             <div id="myPeerNameSetContainer">
                                 <input id="myPeerNameSet" type="text" placeholder="Change name..." maxlength="254" />
+                                <button id="myPeerNameRandomBtn" title="Random speakeasy alias"><i class="fas fa-dice"></i></button>
                                 <button id="myPeerNameSetBtn"><i class="fas fa-user-edit"></i>&nbsp;Change</button>
                             </div>
                         </div>
@@ -1844,6 +1846,7 @@ Note</textarea
         <script defer src="../js/screenReader.js"></script>
         <script defer src="../js/wakeLock.js"></script>
         <script defer src="../js/roomTemplate.js"></script>
+        <script defer src="../js/aob-rooms.js"></script>
         <script defer src="../js/client.js"></script>
         <script defer src="../js/networkStats.js"></script>
         <script defer src="../js/speechRecognition.js"></script>
