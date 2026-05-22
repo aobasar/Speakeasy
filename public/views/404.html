@@ -3,9 +3,9 @@
     <head>
         <!-- Title and Icon -->
 
-        <title idd="notFoundTitle">MiroTalk - 404 Page not found.</title>
-        <link rel="shortcut icon" href="../images/favicon.png" />
-        <link rel="apple-touch-icon" href="../images/logo.png" />
+        <title id="notFoundTitle">AOB Speakeasy — 404, wrong door.</title>
+        <link id="shortcutIcon" rel="shortcut icon" href="../images/favicon.png" />
+        <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.png" />
 
         <!-- Meta Information -->
 
@@ -13,72 +13,54 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
+        <meta name="description" content="This page is not on the guest list. Head back to the entrance." />
+
         <!-- StyleSheet -->
 
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" />
         <link rel="stylesheet" href="../css/landing.css" />
-        <link rel="stylesheet" href="../css/newcall.css" />
+        <link rel="stylesheet" href="../css/login.css" />
+        <link rel="stylesheet" href="../css/aob-login.css" />
 
         <!-- JavaScripts -->
 
         <script async src="../js/stats.js"></script>
     </head>
-    <body class="has-animations">
+    <body class="has-animations aob-auth">
         <div class="body-wrap">
             <header class="site-header reveal-from-top">
                 <div class="container">
                     <div class="site-header-inner">
                         <div class="brand">
-                            <div class="m-0">
-                                <a href="/">
-                                    <img src="../images/logo.png" alt="MiroTalk P2P" width="32" height="32" />
-                                    <!-- <img
-                                        src="../images/mirotalk-mc.png"
-                                        alt="MiroTalk P2P"
-                                        width="96"
-                                        height="auto"
-                                        style="margin-top: 80px"
-                                    /> -->
-                                </a>
-                            </div>
+                            <div class="m-0"></div>
                         </div>
                     </div>
                 </div>
             </header>
             <main class="site-content">
-                <section class="hero section illustration-section-01">
+                <section class="hero section">
                     <div class="container">
                         <div class="hero-inner section-inner">
                             <div class="split-wrap invert-mobile">
                                 <div class="split-item">
                                     <div class="hero-content split-item-content center-content-mobile">
-                                        <h1 class="mt-32 mb-16 reveal-from-bottom" data-reveal-delay="150">
-                                            Oops! <br />
-                                            404 - PAGE NOT FOUND
-                                        </h1>
-                                        <p
-                                            id="getUserMediaError"
-                                            class="mt-0 mb-32 reveal-from-bottom"
-                                            data-reveal-delay="300"
-                                        ></p>
-                                        <p class="mt-0 mb-32 reveal-from-bottom" data-reveal-delay="300">
-                                            This page you are looking not exist.
-                                        </p>
-                                        <div class="reveal-from-bottom" data-reveal-delay="450">
-                                            <button
-                                                class="button button-custom button-wide-mobile br-6 pulse"
-                                                onclick="window.location.href = '/'"
-                                            >
-                                                Go to Homepage
+                                        <div class="login-card">
+                                            <div class="login-icon">
+                                                <img src="../images/logo.png" alt="AOB Speakeasy" />
+                                            </div>
+                                            <h2 class="login-title">Wrong door</h2>
+                                            <p class="login-description">
+                                                404 &mdash; this page isn't on the guest list.<br />
+                                                Knock twice at the entrance and try again.
+                                            </p>
+                                            <button class="login-btn pulse" onclick="window.location.href = '/'">
+                                                <i class="fa-solid fa-door-open"></i>&nbsp;
+                                                <span>Back to the entrance</span>
                                             </button>
                                         </div>
                                     </div>
-                                    <style>
-                                        @media (min-width: 641px) {
-                                            .hero .split-wrap .split-item {
-                                                min-height: 492px;
-                                            }
-                                        }
-                                    </style>
                                 </div>
                             </div>
                         </div>
