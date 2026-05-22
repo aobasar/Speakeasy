@@ -18,20 +18,20 @@ body {
     padding: 40px;
     border: 0.5px solid rgb(255 255 255 / 32%);
     border-radius: 10px;
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 60%, rgba(70, 120, 249, 0.25) 100%);
+    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 60%, rgba(249, 198, 70, 0.25) 100%);
 }
 
 #loginForm:hover,
 #loginForm:focus-within {
-    box-shadow: 0 12px 40px 0 rgba(70, 120, 249, 0.25);
-    border-color: #376df9;
+    box-shadow: 0 12px 40px 0 rgba(249, 198, 70, 0.25);
+    border-color: #f9c646;
 }
 
 /* Hidden by default; shown after successful login without a target room */
 #joinRoomForm {
     display: none;
     margin-top: 32px;
-    background: rgba(70, 120, 249, 0.08);
+    background: rgba(249, 198, 70, 0.08);
     border-radius: 10px;
     padding: 32px 24px;
     transition:
@@ -41,7 +41,7 @@ body {
 
 #joinRoomForm:focus-within,
 #joinRoomForm:hover {
-    border-color: #376df9;
+    border-color: #f9c646;
 }
 
 /* Join Room layout: make JOIN fill the remaining width next to Random */
@@ -586,7 +586,7 @@ a.button-link:active {
 }
 
 a.func-link {
-    color: #376df9;
+    color: #f9c646;
 }
 
 a.func-link:hover,
@@ -736,7 +736,7 @@ strong {
 
 .invert-color a.button-link:hover,
 .invert-color a.button-link:active {
-    color: #376df9;
+    color: #f9c646;
 }
 
 .invert-color a.func-link:hover,
@@ -956,7 +956,7 @@ strong {
 
 .button-primary {
     color: #ffffff;
-    background: linear-gradient(135deg, #376df9 0%, #4678f9 100%);
+    background: linear-gradient(135deg, #f9c646 0%, #f9c646 100%);
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: 0 4px 14px rgba(55, 109, 249, 0.35);
     transition:
@@ -966,7 +966,7 @@ strong {
 }
 
 .button-primary:hover {
-    background: linear-gradient(135deg, #4678f9 0%, #5a8aff 100%);
+    background: linear-gradient(135deg, #f9c646 0%, #ffe55a 100%);
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(55, 109, 249, 0.45);
 }
@@ -982,9 +982,9 @@ strong {
 
 .button-custom-room {
     background:
-        radial-gradient(900px circle at 20% 15%, rgba(70, 120, 249, 0.22) 0%, rgba(70, 120, 249, 0) 55%),
-        radial-gradient(700px circle at 80% 85%, rgba(70, 120, 249, 0.14) 0%, rgba(70, 120, 249, 0) 52%),
-        linear-gradient(135deg, rgba(0, 0, 0, 0.95) 60%, rgba(70, 120, 249, 0.25) 100%);
+        radial-gradient(900px circle at 20% 15%, rgba(249, 198, 70, 0.22) 0%, rgba(249, 198, 70, 0) 55%),
+        radial-gradient(700px circle at 80% 85%, rgba(249, 198, 70, 0.14) 0%, rgba(249, 198, 70, 0) 52%),
+        linear-gradient(135deg, rgba(0, 0, 0, 0.95) 60%, rgba(249, 198, 70, 0.25) 100%);
     box-shadow:
         0 8px 24px rgba(0, 0, 0, 0.45),
         inset 0 1px 0 rgba(255, 255, 255, 0.05);
@@ -1009,11 +1009,11 @@ strong {
     border: 0;
     color: #f9faff !important;
     background-color: #000000;
-    background: linear-gradient(100deg, #376df9 0, #ff5fa0 75%, #ffc55a 100%);
+    background: linear-gradient(100deg, #f9c646 0, #ff5fa0 75%, #ffc55a 100%);
 }
 
 .button-custom:hover {
-    background-color: #4678f9;
+    background-color: #f9c646;
 }
 
 .button-custom.is-loading::after {
@@ -1129,7 +1129,7 @@ fieldset {
 .form-radio input:active,
 .form-radio input:focus {
     outline: none;
-    border-color: #376df9;
+    border-color: #f9c646;
 }
 
 .form-input[disabled],
@@ -1302,8 +1302,8 @@ textarea.form-input {
 
 .form-checkbox input:checked,
 .form-radio input:checked {
-    background-color: #376df9 !important;
-    border-color: #376df9 !important;
+    background-color: #f9c646 !important;
+    border-color: #f9c646 !important;
     background-position: 50%;
 }
 
@@ -1365,7 +1365,7 @@ textarea.form-input {
 }
 
 .form-switch input:checked + .form-switch-icon {
-    background: #376df9;
+    background: #f9c646;
 }
 
 .form-switch input:checked + .form-switch-icon::before {
@@ -1403,7 +1403,7 @@ textarea.form-input {
 .invert-color .form-checkbox input:focus,
 .invert-color .form-radio input:active,
 .invert-color .form-radio input:focus {
-    border-color: #376df9;
+    border-color: #f9c646;
 }
 
 .invert-color .form-input[disabled],
@@ -1468,7 +1468,7 @@ textarea.form-input {
     -webkit-backdrop-filter: blur(12px);
     border: 2px solid rgba(255, 255, 255, 0.25);
     color: #ffffff;
-    caret-color: #4678f9;
+    caret-color: #f9c646;
     font-weight: 600;
     letter-spacing: 0.3px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
@@ -1479,17 +1479,17 @@ textarea.form-input {
 }
 
 .room-input-wrap .form-input:hover {
-    border-color: rgba(70, 120, 249, 0.6);
+    border-color: rgba(249, 198, 70, 0.6);
     background-color: rgba(0, 0, 0, 0.5);
-    box-shadow: 0 4px 16px rgba(70, 120, 249, 0.15);
+    box-shadow: 0 4px 16px rgba(249, 198, 70, 0.15);
 }
 
 .room-input-wrap .form-input:focus {
-    border-color: #4678f9;
+    border-color: #f9c646;
     background-color: rgba(0, 0, 0, 0.55);
     box-shadow:
-        0 0 0 3px rgba(70, 120, 249, 0.2),
-        0 4px 16px rgba(70, 120, 249, 0.15);
+        0 0 0 3px rgba(249, 198, 70, 0.2),
+        0 4px 16px rgba(249, 198, 70, 0.15);
 }
 
 .room-input-wrap .form-input::placeholder {
@@ -1517,28 +1517,28 @@ textarea.form-input {
 
 .room-gen-btn:hover {
     color: #ffffff;
-    background: rgba(70, 120, 249, 0.3);
-    border-color: rgba(70, 120, 249, 0.5);
+    background: rgba(249, 198, 70, 0.3);
+    border-color: rgba(249, 198, 70, 0.5);
 }
 
 .room-gen-btn:focus-visible {
     outline: none;
     color: #ffffff;
-    background: rgba(70, 120, 249, 0.3);
-    border-color: #4678f9;
+    background: rgba(249, 198, 70, 0.3);
+    border-color: #f9c646;
 }
 
 .room-gen-btn:active {
     color: #ffffff;
-    background: rgba(70, 120, 249, 0.5);
-    border-color: #4678f9;
+    background: rgba(249, 198, 70, 0.5);
+    border-color: #f9c646;
     transform: translateY(-50%) scale(0.85);
-    box-shadow: 0 0 8px rgba(70, 120, 249, 0.4);
+    box-shadow: 0 0 8px rgba(249, 198, 70, 0.4);
 }
 
 .room-gen-btn.spin {
     animation: roomGenSpin 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    color: #4678f9;
+    color: #f9c646;
 }
 
 @keyframes roomGenSpin {
@@ -1784,7 +1784,7 @@ textarea.form-input {
 .accordion-icon::after {
     content: '';
     position: absolute;
-    background: #376df9;
+    background: #f9c646;
     transition: transform 0.25s ease-out;
 }
 
@@ -2042,7 +2042,7 @@ textarea.form-input {
 }
 
 .invert-color .carousel-bullet:hover::before {
-    background: #376df9;
+    background: #f9c646;
 }
 
 .split-wrap {
@@ -2511,7 +2511,7 @@ textarea.form-input {
 }
 
 .footer-social a svg {
-    fill: #376df9;
+    fill: #f9c646;
     transition: fill 0.15s ease;
 }
 
@@ -3249,7 +3249,7 @@ ul.pricing-item-features-list li {
     display: inline-flex;
     padding: 1rem;
     border-radius: 1rem;
-    background: radial-gradient(circle at bottom, #376df9 0%, #ff79af 50%, #ff8d74 100%);
+    background: radial-gradient(circle at bottom, #f9c646 0%, #ff79af 50%, #ff8d74 100%);
 }
 
 .pricing .tiles-item-inner {
@@ -3365,11 +3365,11 @@ ul.pricing-item-features-list li.is-checked::after {
 }
 
 .testimonial-item-link {
-    color: #376df9;
+    color: #f9c646;
 }
 
 .testimonial-item-link a {
-    color: #376df9;
+    color: #f9c646;
     text-decoration: none;
 }
 
@@ -3385,8 +3385,8 @@ ul.pricing-item-features-list li.is-checked::after {
 .cta-inner {
     padding-left: 16px;
     padding-right: 16px;
-    background-color: #376df9;
-    background: linear-gradient(100deg, #376df9 0, #ff5fa0 75%, #ffc55a 100%);
+    background-color: #f9c646;
+    background: linear-gradient(100deg, #f9c646 0, #ff5fa0 75%, #ffc55a 100%);
 }
 
 @media (min-width: 641px) {
@@ -3461,7 +3461,7 @@ ul.pricing-item-features-list li.is-checked::after {
 }
 
 .text-color-primary {
-    color: #376df9;
+    color: #f9c646;
 }
 
 .text-color-secondary {
@@ -4085,7 +4085,7 @@ img.has-shadow {
 html,
 body {
     scrollbar-width: thin;
-    scrollbar-color: #4678f9 #1a1b1f;
+    scrollbar-color: #f9c646 #1a1b1f;
 }
 
 /* Target the scrollbar track */
@@ -4096,14 +4096,14 @@ body {
 
 /* Target the scrollbar thumb (the draggable part) */
 ::-webkit-scrollbar-thumb {
-    background: #4678f9;
+    background: #f9c646;
     border-radius: 8px; /* rounded corners for the thumb */
     cursor: pointer;
 }
 
 /* Target the scrollbar track when the thumb is being hovered */
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #376df9; /* color of the thumb on hover */
+    background-color: #f9c646; /* color of the thumb on hover */
 }
 
 /* Target the scrollbar track when the scrollbar is being hovered */
@@ -4150,8 +4150,8 @@ body {
 }
 
 .last-room a:hover {
-    background-color: rgba(70, 120, 249, 0.15);
-    color: #4678f9;
+    background-color: rgba(249, 198, 70, 0.15);
+    color: #f9c646;
     transition: all 0.2s ease;
 }
 
@@ -4261,7 +4261,7 @@ body {
 
 #supportUs .cta-inner {
     background-color: rgba(0, 0, 0, 0.95) !important;
-    background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 60%, rgba(70, 120, 249, 0.25) 100%) !important;
+    background-image: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 60%, rgba(249, 198, 70, 0.25) 100%) !important;
 }
 
 .support-us-content {
@@ -4422,7 +4422,7 @@ body {
 .support-footer {
     margin-top: 32px;
     padding-top: 24px;
-    border-top: 1px solid rgba(70, 120, 249, 0.2);
+    border-top: 1px solid rgba(249, 198, 70, 0.2);
 }
 
 .support-footer a {

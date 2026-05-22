@@ -45,8 +45,11 @@
         <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
         <link rel="stylesheet" href="../css/waitingRoom.css" />
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;600;700&display=swap" />
+        <link rel="stylesheet" href="../css/aob-custom.css" />
+        <link rel="stylesheet" href="../css/aob-login.css" />
     </head>
-    <body class="has-animations">
+    <body class="has-animations aob-auth">
         <div class="body-wrap">
             <header class="site-header reveal-from-top">
                 <div class="container">
@@ -69,13 +72,13 @@
                                 <div class="split-item">
                                     <div class="hero-content split-item-content center-content-mobile">
                                         <div
-                                            class="waiting-card reveal-from-bottom"
+                                            class="waiting-card login-card reveal-from-bottom"
                                             data-reveal-delay="150"
                                             role="status"
                                             aria-live="polite"
                                         >
                                             <div class="waiting-icon">
-                                                <i class="fa-solid fa-users"></i>
+                                                <img src="../images/logo.png" alt="Speakeasy" />
                                             </div>
                                             <h2 id="waitingRoomHeading" class="waiting-title">Waiting for host...</h2>
                                             <p id="waitingRoomDescription" class="waiting-description">

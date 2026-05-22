@@ -155,6 +155,25 @@ function initAudioPlayer() {
         audioMuteIcon.className = waitingAudio.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
         audioMuteBtn.title = waitingAudio.muted ? 'Unmute' : 'Mute';
     };
+
+    // AOB Speakeasy — otomatik başlat (loop zaten açık); tarayıcı engellerse ilk tıklamada başla
+    function startWaitingAudio() {
+        if (audioPlaying || !waitingAudio) return;
+        waitingAudio
+            .play()
+            .then(function () {
+                audioPlaying = true;
+                audioIcon.className = 'fa-solid fa-pause';
+                audioBtn.title = 'Pause music';
+            })
+            .catch(function () {});
+    }
+    startWaitingAudio();
+    const onFirstInteract = function () {
+        startWaitingAudio();
+        document.removeEventListener('pointerdown', onFirstInteract);
+    };
+    document.addEventListener('pointerdown', onFirstInteract);
 }
 
 // Initialize audio player after brand is loaded

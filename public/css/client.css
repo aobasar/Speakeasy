@@ -398,8 +398,8 @@ body {
 
 .init-user select:focus {
     outline: none;
-    border-color: rgba(70, 120, 249, 0.6);
-    box-shadow: 0 0 0 2px rgba(70, 120, 249, 0.15);
+    border-color: rgba(249, 198, 70, 0.6);
+    box-shadow: 0 0 0 2px rgba(249, 198, 70, 0.15);
 }
 
 .init-user button {
@@ -3072,8 +3072,8 @@ button {
 
 #mySettings select:focus {
     outline: none;
-    border-color: rgba(70, 120, 249, 0.6);
-    box-shadow: 0 0 0 2px rgba(70, 120, 249, 0.15);
+    border-color: rgba(249, 198, 70, 0.6);
+    box-shadow: 0 0 0 2px rgba(249, 198, 70, 0.15);
 }
 
 #mySettingsCloseBtn {
@@ -3286,8 +3286,8 @@ button {
 
 #themeColorPicker:focus {
     outline: none;
-    border-color: rgba(70, 120, 249, 0.6);
-    box-shadow: 0 0 0 2px rgba(70, 120, 249, 0.15);
+    border-color: rgba(249, 198, 70, 0.6);
+    box-shadow: 0 0 0 2px rgba(249, 198, 70, 0.15);
 }
 
 #keepCustomTheme {
@@ -4522,7 +4522,7 @@ input:checked + .slider:before {
     font-size: 1.2rem;
     border-radius: 8px;
     color: #ffffff;
-    background: linear-gradient(65deg, #376df9 0, #ff5fa0 100%);
+    background: linear-gradient(65deg, #f9c646 0, #ff5fa0 100%);
     transition: background 0.23s;
     cursor: pointer;
 }
@@ -4593,8 +4593,8 @@ input:checked + .slider:before {
 #recognitionDialect:focus,
 #recognitionLanguage:focus {
     outline: none;
-    border-color: rgba(70, 120, 249, 0.6);
-    box-shadow: 0 0 0 2px rgba(70, 120, 249, 0.15);
+    border-color: rgba(249, 198, 70, 0.6);
+    box-shadow: 0 0 0 2px rgba(249, 198, 70, 0.15);
 }
 
 /*--------------------------------------------------------------
@@ -4639,8 +4639,8 @@ select:hover {
 
 select:focus {
     outline: none;
-    border-color: rgba(70, 120, 249, 0.6);
-    box-shadow: 0 0 0 2px rgba(70, 120, 249, 0.15);
+    border-color: rgba(249, 198, 70, 0.6);
+    box-shadow: 0 0 0 2px rgba(249, 198, 70, 0.15);
 }
 
 hr {

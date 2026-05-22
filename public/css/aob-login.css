@@ -89,7 +89,8 @@ body.aob-auth {
 
 /* Titles */
 .aob-auth .login-title,
-.aob-auth .join-room-title {
+.aob-auth .join-room-title,
+.aob-auth .waiting-title {
     margin: 0 0 4px;
     font-family: 'Playfair Display', Georgia, serif;
     font-size: 24px;
@@ -276,6 +277,11 @@ body.aob-auth {
     max-width: 260px;
     height: auto;
     object-fit: contain;
+}
+
+/* ÖNİZLEME: tüm normal yazılar Playfair (ikonlar hariç) */
+.aob-auth *:not(i):not([class*='fa-']):not(.fas):not(.far):not(.fab):not(.fa) {
+    font-family: 'Playfair Display', Georgia, serif !important;
 }
 
 /* Logo zaten "Speakeasy" yazısını içerdiği için başlık/açıklamayı gizle */

@@ -68,3 +68,148 @@ label:hover i[class*='fa-'] {
 .swal2-title {
     font-family: 'Playfair Display', Georgia, serif !important;
 }
+
+/* Menüde gizlenen öğeler */
+#aboutBtn,
+#tabLanguagesBtn {
+    display: none !important;
+}
+
+/* QR kod köşeleri */
+#qrRoom {
+    border-radius: 15px;
+}
+
+/* Profil isim "random" butonu — diğer butonlarla aynı boyda kare */
+#myPeerNameRandomBtn {
+    height: 46px;
+    width: 46px;
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    box-sizing: border-box;
+    margin-top: 0;
+}
+
+/* Profile sekmesini ayarlarda en üste taşı */
+#tabProfileBtn {
+    order: -1;
+}
+
+/* Profil avatarı — şeffaf croodles arkasına beyaz zemin */
+#myProfileAvatar {
+    background: white;
+}
+
+/* Waiting room — ayraç kaldır */
+.waiting-divider {
+    display: none !important;
+}
+
+/* Waiting room logosu (fa-users yerine) */
+.waiting-icon {
+    text-align: center;
+    margin-bottom: 12px;
+    background: none;
+    border: none;
+    width: auto;
+    height: auto;
+    border-radius: 0;
+    animation: none !important;
+}
+.waiting-icon img {
+    height: 110px;
+    width: auto;
+    max-width: 220px;
+    object-fit: contain;
+}
+
+/* Waiting room oda adı */
+#waitingRoomNameText {
+    font-size: 24px;
+}
+
+/* Door-open ikon boyutu */
+.fa-solid.fa-door-open {
+    font-size: 24px;
+}
+
+/* Waiting room audio — bar + çal/duraklat yok; tek buton (hoparlör/mute toggle) */
+.waiting-audio-bar,
+#waitingAudioBtn {
+    display: none !important;
+}
+.waiting-audio-player {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    width: fit-content;
+    margin: 10px auto;
+}
+
+/* ÖNİZLEME: tüm normal yazılar Playfair (ikonlar hariç) */
+body *:not(i):not([class*='fa-']):not(.fas):not(.far):not(.fab):not(.fa) {
+    font-family: 'Playfair Display', Georgia, serif !important;
+}
+
+/* ==========================================================================
+   DENEME: Phosphor ikonları — FA glyph'lerini Phosphor ile değiştir
+   ========================================================================== */
+@font-face {
+    font-family: 'PhosphorAOB';
+    src: url('https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/Phosphor.woff2') format('woff2');
+    font-display: swap;
+}
+.fa-video::before, .fa-video-camera::before,
+.fa-microphone::before, .fa-microphone-lines::before,
+.fa-microphone-slash::before, .fa-microphone-lines-slash::before,
+.fa-desktop::before, .fa-users::before, .fa-user::before,
+.fa-comments::before, .fa-comment::before, .fa-comment-dots::before,
+.fa-gear::before, .fa-cog::before,
+.fa-hand-paper::before, .fa-hand::before,
+.fa-expand::before, .fa-compress::before,
+.fa-share-nodes::before, .fa-share-alt::before,
+.fa-ellipsis-v::before, .fa-ellipsis-vertical::before,
+.fa-smile::before, .fa-globe::before, .fa-lock::before, .fa-key::before,
+.fa-eye::before, .fa-eye-slash::before, .fa-phone-slash::before,
+.fa-right-to-bracket::before, .fa-door-open::before, .fa-arrows-rotate::before,
+.fa-circle-play::before, .fa-play::before, .fa-camera::before,
+.fa-paper-plane::before, .fa-record-vinyl::before,
+.fa-pen::before, .fa-pencil::before, .fa-file::before, .fa-image::before {
+    font-family: 'PhosphorAOB' !important;
+    font-weight: 400 !important;
+}
+.fa-video::before, .fa-video-camera::before { content: '\e4da' !important; }
+.fa-video-slash::before { content: '\e4dc' !important; font-family: 'PhosphorAOB' !important; font-weight: 400 !important; }
+.fa-microphone::before, .fa-microphone-lines::before { content: '\e326' !important; }
+.fa-microphone-slash::before, .fa-microphone-lines-slash::before { content: '\e328' !important; }
+.fa-desktop::before { content: '\e32e' !important; }
+.fa-users::before { content: '\e4d6' !important; }
+.fa-user::before { content: '\e4c2' !important; }
+.fa-comments::before, .fa-comment::before, .fa-comment-dots::before { content: '\e168' !important; }
+.fa-gear::before, .fa-cog::before { content: '\e270' !important; }
+.fa-hand-paper::before, .fa-hand::before { content: '\e57e' !important; }
+.fa-expand::before { content: '\e0a2' !important; }
+.fa-compress::before { content: '\e09a' !important; }
+.fa-share-nodes::before, .fa-share-alt::before { content: '\e408' !important; }
+.fa-ellipsis-v::before, .fa-ellipsis-vertical::before { content: '\e208' !important; }
+.fa-smile::before { content: '\e436' !important; }
+.fa-globe::before { content: '\e288' !important; }
+.fa-lock::before { content: '\e2fa' !important; }
+.fa-key::before { content: '\e2d6' !important; }
+.fa-eye::before { content: '\e220' !important; }
+.fa-eye-slash::before { content: '\e224' !important; }
+.fa-phone-slash::before { content: '\e3c4' !important; }
+.fa-right-to-bracket::before { content: '\e428' !important; }
+.fa-door-open::before { content: '\e7e6' !important; }
+.fa-arrows-rotate::before { content: '\e094' !important; }
+.fa-circle-play::before, .fa-play::before { content: '\e3d2' !important; }
+.fa-camera::before { content: '\e10e' !important; }
+.fa-paper-plane::before { content: '\e398' !important; }
+.fa-record-vinyl::before { content: '\e3ee' !important; }
+.fa-pen::before, .fa-pencil::before { content: '\e3b4' !important; }
+.fa-file::before { content: '\e230' !important; }
+.fa-image::before { content: '\e2ca' !important; }

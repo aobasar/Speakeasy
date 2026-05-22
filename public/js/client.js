@@ -8585,10 +8585,10 @@ function shareRoomByEmail() {
             const roomURL = getRoomURL();
             const newLine = '%0D%0A%0D%0A';
             const selectedDateTime = document.getElementById('datetimePicker').value;
-            const roomPassword = isRoomLocked && thisRoomPassword ? `Tonight's word at the door: ` + thisRoomPassword + newLine : '';
+            const roomPassword = isRoomLocked && thisRoomPassword ? `The word at the door: ` + thisRoomPassword + newLine : '';
             const email = '';
-            const emailSubject = `Psst... you're on the list tonight`;
-            const emailBody = `Word on the street is you've got good taste in company. We're cracking the back door of the Speakeasy just for you - slip in and grab a stool.${newLine}When: ${selectedDateTime}${newLine}${roomPassword}Sneak in here: ${roomURL}${newLine}Act natural. What happens at the Speakeasy, stays at the Speakeasy.`;
+            const emailSubject = `Psst... you're on the list`;
+            const emailBody = `Word on the street is you've got good taste in company. We're cracking the back door of the Speakeasy just for you - slip in and grab a stool.${newLine}When: ${selectedDateTime}${newLine}${roomPassword}Sneak in here: ${roomURL}${newLine}Act natural. What happens at the Speakeasy, stays at the Speakeasy.${newLine}- TheFixer`;
             document.location = 'mailto:' + email + '?subject=' + emailSubject + '&body=' + emailBody;
         },
     });
@@ -12457,7 +12457,7 @@ async function updateMyPeerAvatarByUrl() {
                 img.src = url;
                 img.title = 'Click to use this avatar';
                 img.style.cssText =
-                    'width:48px;height:48px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color 0.2s;object-fit:cover;background:#222;flex-shrink:0;';
+                    'width:48px;height:48px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color 0.2s;object-fit:cover;background:#fff;flex-shrink:0;';
                 img.addEventListener('mouseover', () => (img.style.borderColor = '#4caf50'));
                 img.addEventListener('mouseout', () => (img.style.borderColor = 'transparent'));
                 img.addEventListener('click', () => {
