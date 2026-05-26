@@ -7567,6 +7567,7 @@ function setAboutBtn() {
 function setLeaveRoomBtn() {
     leaveRoomBtn.addEventListener('click', (e) => {
         if (e && e.shiftKey) return leaveRoom();
+        if (!isPresenter) return leaveRoom();
         toggleExitMenu();
     });
     if (exitLeaveBtn) exitLeaveBtn.onclick = handleExitLeave;
