@@ -319,7 +319,15 @@ access to use this app.
                 </div>
             </div>
 
-            <button id="leaveRoomBtn" class="fa-solid fa-phone-slash"></button>
+            <div id="exitDropdown">
+                <button id="leaveRoomBtn" class="fa-solid fa-phone-slash"></button>
+                <div id="exitMenu" class="hidden" aria-labelledby="leaveRoomBtn">
+                    <button id="exitLeaveBtn"><i class="fas fa-sign-out-alt"></i> Leave room</button>
+                    <button id="exitLeaveAllBtn" class="hidden">
+                        <i class="fas fa-power-off red"></i> <span class="red">End room for all</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <!-- End bottom buttons -->
@@ -1468,6 +1476,18 @@ access to use this app.
                     </div>
                 </div>
             </main>
+            <!-- Bottom-left secondary drag handle -->
+            <div
+                id="whiteboardBottomLeftDragHandle"
+                class="whiteboard-bottom-left-handle"
+                title="Drag to move whiteboard"
+            >
+                <i class="fas fa-arrows-alt"></i>
+            </div>
+            <!-- Bottom-right secondary drag handle -->
+            <div id="whiteboardBottomDragHandle" class="whiteboard-bottom-handle" title="Drag to move whiteboard">
+                <i class="fas fa-arrows-alt"></i>
+            </div>
         </section>
 
         <!-- End whiteboard -->
@@ -1751,8 +1771,7 @@ access to use this app.
                     rows="4"
                     placeholder="Type your note here..."
                 >
-Note</textarea
-                >
+Note</textarea>
                 <div class="sticky-note-colors-row">
                     <div class="sticky-note-color-group">
                         <label for="stickyNoteColor" class="sticky-note-color-label">

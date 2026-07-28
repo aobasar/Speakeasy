@@ -439,7 +439,7 @@ body {
 --------------------------------------------------------------*/
 
 #bottomButtons {
-    z-index: 10;
+    z-index: 12;
     display: none;
     position: fixed;
     padding: 10px;
@@ -464,6 +464,61 @@ body {
     align-items: stretch;
     overflow: visible;
     border-radius: 10px;
+}
+
+/* Exit dropdown menu (Leave room / End room for all) */
+#bottomButtons #exitDropdown {
+    position: relative;
+    display: inline-flex;
+}
+
+#bottomButtons #exitMenu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    right: 0;
+    min-width: 220px;
+    z-index: 9999;
+    background: var(--body-bg);
+    border: var(--border);
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+    padding: 6px 0;
+    text-align: left;
+}
+
+#bottomButtons #exitMenu button {
+    display: flex;
+    width: calc(100% - 12px);
+    height: auto;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 10px 16px;
+    margin: 2px 6px;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    background: transparent;
+    color: #fff;
+    transition:
+        transform 0.15s ease,
+        background 0.2s ease;
+}
+
+#bottomButtons #exitMenu button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateX(3px) !important;
+}
+
+#bottomButtons #exitMenu button i {
+    width: 20px;
+    min-width: 20px;
+    text-align: center;
+    margin-right: 10px;
+    font-size: 1.1em;
+}
+
+#bottomButtons #exitMenu .red {
+    color: #dc3545 !important;
 }
 
 /* Let the dropdown menu anchor to the whole split button (not only the arrow). */
@@ -2382,20 +2437,19 @@ button {
     display: block;
     width: 100%;
     min-width: 0;
-    padding: 12px 14px;
+    padding: 0;
     margin: 0;
     font-size: 0.95rem;
     background-color: transparent;
     color: #ffffff;
-    border: var(--border);
-    border-radius: 14px;
+    border: none;
+    border-radius: 0;
     box-sizing: border-box;
     transition: all 0.25s ease;
 }
 
 #searchPeerBarName:focus {
     outline: none;
-    border-color: rgba(97, 195, 201, 0.34);
     background-color: transparent;
 }
 
@@ -4653,6 +4707,11 @@ select:focus {
     outline: none;
     border-color: rgba(249, 198, 70, 0.6);
     box-shadow: 0 0 0 2px rgba(249, 198, 70, 0.15);
+}
+
+select option {
+    background: var(--select-bg);
+    color: #fff;
 }
 
 hr {
