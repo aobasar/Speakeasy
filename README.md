@@ -36,7 +36,7 @@ join through a shared room link, with no account.
 
 **In a call**
 
-<img src="docs/screenshots/in-call.jpg" alt="Speakeasy in-call interface" width="820" />
+<img src="docs/screenshots/in-call-v2.png" alt="Speakeasy in-call interface" width="820" />
 
 **Waiting room**
 
