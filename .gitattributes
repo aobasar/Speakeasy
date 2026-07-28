@@ -1,0 +1,24 @@
+# AOB Speakeasy — fork-owned files, protected from the daily upstream merge.
+#
+# These files exist upstream too, but ours are deliberately different: upstream's versions
+# advertise MiroTalk, carry its sponsorship and affiliate links, and route bug and conduct
+# reports to its maintainer. Without this, every upstream edit to them would either
+# conflict (failing the sync job) or quietly reintroduce that content here.
+#
+# `merge=ours` keeps OUR version whenever both sides changed the file. It requires the
+# driver to be defined; the sync workflow does that with:
+#
+#     git config merge.ours.driver true
+#
+# If you merge upstream by hand on a local clone, run that once there as well — otherwise
+# git falls back to a normal merge and you will get conflicts in these files.
+#
+# Trade-off, stated plainly: genuine upstream improvements to these four files are
+# discarded along with the marketing. In practice upstream only edits them to rotate
+# sponsors, so the trade is worth it — but it is a trade.
+
+README.md            merge=ours
+SECURITY.md          merge=ours
+CODE_OF_CONDUCT.md   merge=ours
+.github/FUNDING.yml  merge=ours
+.gitattributes       merge=ours

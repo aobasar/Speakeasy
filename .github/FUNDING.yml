@@ -1,1 +1,11 @@
-github: [miroslavpejic85]
+# Speakeasy fork — intentionally empty.
+#
+# Upstream MiroTalk ships this file pointing at its author's GitHub Sponsors page.
+# Keeping it here would put a "Sponsor" button on THIS repository that collects on
+# someone else's behalf without them knowing, which is misleading in both directions.
+#
+# This fork does not solicit sponsorship. If you want to support the original project,
+# do it at the source: https://github.com/sponsors/miroslavpejic85
+#
+# The file is kept (rather than deleted) so the daily upstream-sync merge has a file to
+# resolve against — see .gitattributes, where it is pinned with `merge=ours`.

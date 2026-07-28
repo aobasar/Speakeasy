@@ -1,288 +1,178 @@
 <div align="center">
-    <a href="https://p2p.mirotalk.com" target="_blank">
-        <img src="public/images/mirotalk-icon.png">
-    </a>
+
+<img src="public/images/logo.svg" alt="Speakeasy" width="140" />
+
+# Speakeasy
+
+**A self-hosted, rebranded fork of [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk) — AGPLv3**
+
+[![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-D4AF37.svg)](LICENSE)
+[![Upstream](https://img.shields.io/badge/upstream-miroslavpejic85%2Fmirotalk-555.svg)](https://github.com/miroslavpejic85/mirotalk)
+
 </div>
 
-<h1 align="center">MiroTalk P2P</h1>
+---
 
-<h3 align="center">Open Source WebRTC P2P Video Conferencing You Can Self-Host in Minutes</h3>
+**I did not build the WebRTC platform.** The peer-to-peer video engine, the signalling
+server and the underlying feature set are [Miroslav Pejić](https://github.com/miroslavpejic85)'s
+work, released as open source under AGPLv3.
 
-<h4 align="center">Free, Secure, Fast Real-Time Communication - up to 8K, 60fps. Works in All Browsers and Platforms.</h4>
+What I built is everything wrapped around it: a production deployment on my own
+infrastructure, a complete visual and editorial rebrand, a reworked interface, and the
+automation that keeps this fork current with upstream instead of letting it rot.
 
-<br />
+**Live:** <https://speakeasy.aobprojects.com> — host-protected. The host signs in; guests
+join through a shared room link, with no account.
+
+---
+
+## Screenshots
 
 <div align="center">
 
-[![GitHub Stars](https://img.shields.io/github/stars/miroslavpejic85/mirotalk?style=social)](https://github.com/miroslavpejic85/mirotalk/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/miroslavpejic85/mirotalk?style=social)](https://github.com/miroslavpejic85/mirotalk/network/members)
+**Login**
 
-<a href="https://choosealicense.com/licenses/agpl-3.0/">![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3_Open_Source-blue.svg)</a>
-<a href="https://hub.docker.com/r/mirotalk/p2p">![Docker Pulls](https://img.shields.io/docker/pulls/mirotalk/p2p)</a>
-<a href="https://github.com/miroslavpejic85/mirotalk/commits/master">![Last Commit](https://img.shields.io/github/last-commit/miroslavpejic85/mirotalk)</a>
-<a href="https://discord.gg/rgGYfeYW3N">![Discord](https://img.shields.io/badge/Discord-Community-5865F2?logo=discord&logoColor=white)</a>
-<a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/">![Author](https://img.shields.io/badge/Author-Miroslav_Pejic-brightgreen.svg)</a>
+<img src="docs/screenshots/login.png" alt="Speakeasy login screen" width="820" />
+
+**In a call**
+
+<img src="docs/screenshots/in-call.jpg" alt="Speakeasy in-call interface" width="820" />
+
+**Waiting room**
+
+<img src="docs/screenshots/waiting-room.png" alt="Speakeasy waiting room" width="820" />
 
 </div>
 
-<br />
-
-<p align="center"><strong>MiroTalk P2P</strong> is a <strong>self-hosted, open-source video conferencing</strong> platform using direct <strong>peer-to-peer WebRTC connections</strong> for fast, secure, real-time communication. Deploy on your own server in minutes. Enjoy unlimited rooms, no time limits, end-to-end privacy, and a rich feature set - all under your control.</p>
-
-<p align="center">
-    <a href="https://p2p.mirotalk.com">Try Live Demo</a> · <a href="https://p2p.mirotalk.com/privacy">Privacy</a> · <a href="https://docs.mirotalk.com/mirotalk-p2p/self-hosting/">Documentation</a> · <a href="https://discord.gg/rgGYfeYW3N">Discord</a> · <a href="https://github.com/sponsors/miroslavpejic85">Sponsor</a>
-</p>
-
-<br />
-
-<p align="center">
-    <a href="https://p2p.mirotalk.com/">
-        <img src="public/images/mirotalk-github.gif" alt="MiroTalk P2P - Open Source Video Conferencing">
-    </a>
-</p>
-
-<p align="center">Proudly sponsored by</p>
-
-<h1 align=center><a href="https://www.recall.ai/?utm_source=github&utm_medium=sponsorship&utm_campaign=miroslavpejic85-mirotalk">Recall.ai</a> - API for meeting recording</h1>
-<p align="center">An API for recording Zoom, Google Meet, Microsoft Teams, and in-person meetings.</p>
-
-<hr />
-
-<br />
-
-<details>
-<summary>✨ Why MiroTalk P2P?</summary>
-
-<br/>
-
-|                    | MiroTalk P2P                                                                                                                                        | Other Solutions             |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------- |
-| 💰 **Cost**        | Free & Open Source (AGPLv3). [One-time fee licenses](https://codecanyon.net/item/mirotalk-p2p-webrtc-realtime-video-conferences/38376661) available | Paid plans                  |
-| 🏠 **Self-hosted** | ✅ Full control over your data                                                                                                                      | ❌ Cloud only               |
-| 🔒 **Privacy**     | Your server, your rules                                                                                                                             | Third-party data processing |
-| ⏱️ **Time limits** | Unlimited                                                                                                                                           | 40-60 min on free tiers     |
-| 🏢 **Rooms**       | Unlimited concurrent rooms                                                                                                                          | Limited                     |
-| 🎥 **Resolution**  | Up to 8K @ 60fps                                                                                                                                    | Up to 1080p                 |
-| 🌍 **Languages**   | 133 languages                                                                                                                                       | ~30-80                      |
-| 🔌 **API**         | Full REST API included                                                                                                                              | Paid add-on                 |
-| 🤖 **AI Features** | ChatGPT (OpenAI) integration                                                                                                                        | Paid AI add-ons             |
-| 🧩 **Rebrand**     | Full source code, white-label ready                                                                                                                 | Limited branding options    |
-| 📦 **Deploy**      | Docker, Node.js, one-click install                                                                                                                  | N/A (SaaS only)             |
-
-</details>
-
-<details>
-<summary>🚀 Features</summary>
-
-<br/>
-
-- 🎥 Video up to **8K @ 60fps** · Screen sharing · Recording · Picture-in-Picture
-- 💬 Chat with Markdown & emoji · Collaborative whiteboard · File sharing
-- 🤖 ChatGPT (OpenAI) integration · Speech recognition
-- 🔒 OIDC auth · [Host protection](https://docs.mirotalk.com/mirotalk-p2p/host-protection/) · JWT credentials · Room passwords · Peer-to-peer encryption
-- 🔌 REST API · Slack & Mattermost · Embeddable [iframe](https://docs.mirotalk.com/mirotalk-p2p/integration/#iframe) & [widget](https://docs.mirotalk.com/mirotalk-p2p/integration/#widgets-integration) · 133 languages
-
-**[See all features →](https://docs.mirotalk.com/overview/)**
-
-</details>
-
-<details open>
-<summary>⚡ Quick start</summary>
-
-<br/>
-
-**Start in 6 commands:**
-
-```bash
-git clone https://github.com/miroslavpejic85/mirotalk.git
-cd mirotalk
-cp .env.template .env
-cp app/src/config.template.js app/src/config.js
-npm install
-npm start
-```
-
-Open [http://localhost:3000](http://localhost:3000) - done!
-
-</details>
-
-<details>
-<summary>🐳 Docker</summary>
-
-<br/>
-
-![docker](public/images/docker.png)
-
-**Prerequisites:** Install [Docker Engine](https://docs.docker.com/engine/install/) and [Docker Compose](https://docs.docker.com/compose/install/) - Image available on [Docker Hub](https://hub.docker.com/r/mirotalk/p2p)
-
-```bash
-git clone https://github.com/miroslavpejic85/mirotalk.git
-cd mirotalk
-cp .env.template .env
-cp app/src/config.template.js app/src/config.js
-cp docker-compose.template.yml docker-compose.yml
-docker-compose pull    # optional: pull official image
-docker-compose up      # add -d to run in background
-```
-
-Open [http://localhost:3000](http://localhost:3000) - done!
-
-> **Note:**
-> Edit `app/src/config.js`, `.env`, and `docker-compose.yml` to customize your setup.
-
-</details>
-
-<details>
-<summary>📚 Documentation</summary>
-
-<br/>
-
-For detailed guides and references, visit the **[official documentation](https://docs.mirotalk.com)**:
-
-- [Our Story](https://docs.mirotalk.com/story/)
-- [About](https://docs.mirotalk.com/mirotalk-p2p/)
-- [Self-Hosting Guide](https://docs.mirotalk.com/mirotalk-p2p/self-hosting/)
-- [Automation-scripts](https://docs.mirotalk.com/scripts/about/)
-- [Configurations](https://docs.mirotalk.com/mirotalk-p2p/configurations/)
-- [Rebranding](https://docs.mirotalk.com/mirotalk-p2p/rebranding/)
-- [Host Protection Mode](https://docs.mirotalk.com/mirotalk-p2p/host-protection/)
-- [Integration](https://docs.mirotalk.com/mirotalk-p2p/integration/)
-- [Direct Room Join](https://docs.mirotalk.com/mirotalk-p2p/join-room/)
-- [REST API Documentation](https://docs.mirotalk.com/mirotalk-p2p/api/)
-- [Ngrok](https://docs.mirotalk.com/mirotalk-p2p/ngrok/)
-- [Updates](https://docs.mirotalk.com/mirotalk-p2p/updates/)
-- [WebHook](https://docs.mirotalk.com/mirotalk-p2p/webhook/)
-
-</details>
-
-<details open>
-<summary>☁️ Recommended Hosting Providers</summary>
-
-<br/>
-
-| Provider                                                                                       | Description                                                                                                                                             | Link                                                                |
-| ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| [![Cloudron](public/sponsors/Cloudron.png)](https://www.cloudron.io/)                          | One-click install from the [Cloudron App Store](https://www.cloudron.io/store/index.html). Automates deployment, updates, backups, and user management. | [Get Started](https://www.cloudron.io/)                             |
-| [![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)                             | High-performance cloud servers and dedicated root servers with top-tier reliability. Powers our live demo.                                              | [Get €20 Free Credits](https://hetzner.cloud/?ref=XdRifCzCK3bn)     |
-| [![Netcup](public/sponsors/Netcup.png)](https://www.netcup.com/en/?ref=309627)                 | Enterprise-grade performance at unbeatable prices. Scalable and reliable.                                                                               | [Explore Netcup](https://www.netcup.com/en/?ref=309627)             |
-| [![Hostinger](public/advertisers/Hostinger.png)](https://hostinger.com/?REFERRALCODE=MIROTALK) | Fast, reliable hosting with 24/7 support and great performance.                                                                                         | [Check out Hostinger](https://hostinger.com/?REFERRALCODE=MIROTALK) |
-| [![Contabo](public/advertisers/Contabo.png)](https://www.dpbolvw.net/click-101027391-14462707) | Top-tier German hosting, dedicated servers, VPS, and web hosting at unbeatable prices.                                                                  | [Explore Contabo](https://www.dpbolvw.net/click-101027391-14462707) |
-
-To set up your own instance of `MiroTalk P2P` on a dedicated cloud server, please refer to our comprehensive [self-hosting documentation](https://docs.mirotalk.com/mirotalk-p2p/self-hosting/).
-
-</details>
-
-<details>
-<summary>🙏 Credits</summary>
-
-<br/>
-
-- ianramzy (html [template](https://cruip.com/demos/neon/))
-- vasanthv (webrtc-logic)
-- fabric.js (whiteboard)
-- [DiceBear](https://www.dicebear.com/) (random avatars)
-- [Image by ddraw on Freepik](https://www.freepik.com/free-vector/collection-female-male-avatars_1105371.htm) (avatar illustrations)
-
-</details>
-
-<details>
-<summary>🤝 Contributing</summary>
-
-<br/>
-
-Contributions are welcome and greatly appreciated! Whether it's bug fixes, features, or documentation - every contribution helps.
-
-1. Fork the repository
-2. Create your feature branch
-3. Run `npm run lint` before committing
-4. Submit a pull request
-
-Have questions? Join our [Discord community](https://discord.gg/rgGYfeYW3N)!
-
-</details>
-
-<details>
-<summary>📄 License</summary>
-
-<br/>
-
-[![AGPLv3](public/images/AGPLv3.png)](LICENSE)
-
-MiroTalk P2P is free and open-source under the terms of AGPLv3 (GNU Affero General Public License v3.0). Please `respect the license conditions`, In particular `modifications need to be free as well and made available to the public`. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
-
-To obtain a [MiroTalk P2P license](https://docs.mirotalk.com/license/licensing-options/) with terms different from the AGPLv3, you can conveniently make your [purchase on CodeCanyon](https://codecanyon.net/item/mirotalk-p2p-webrtc-realtime-video-conferences/38376661). This allows you to tailor the licensing conditions to better suit your specific requirements.
-
-</details>
-
-<details open>
-<summary>❤️ Support the project</summary>
-
-<br/>
-
-Do you find MiroTalk P2P indispensable for your needs? Join us in supporting this transformative project by [becoming a backer or sponsor](https://github.com/sponsors/miroslavpejic85). By doing so, not only will your logo prominently feature here, but you'll also drive the growth and sustainability of MiroTalk P2P. Your support is vital in ensuring that this valuable platform continues to thrive and remain accessible for all. Make an impact - back MiroTalk P2P today and be part of this exciting journey!
-
-|                                                                                                                    |                                                                                                                                   |                                                                                |
-| ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| [![Cloudron](public/sponsors/Cloudron.png)](https://cloudron.io)                                                   | [![EffectsSDK](public/sponsors/EffectsSDK.png)](https://effectssdk.ai/)                                                           | [![QuestionPro](public/sponsors/QuestionPro.png)](https://www.questionpro.com) |
-| [![TestMuAI](public/sponsors/TestMuAIBlack.svg)](https://www.testmuai.com/?utm_medium=sponsor&utm_source=mirotalk) | [![BrowserStack](public/sponsors/BrowserStack.png)](https://www.browserstack.com)                                                 | [![CrystalSound](public/sponsors/CrystalSound.png)](https://crystalsound.ai)   |
-| [![Netcup](public/sponsors/Netcup.png)](https://www.netcup.com/en/?ref=309627)                                     | [![LiveAvatar](public/sponsors/LiveAvatarByHeyGen.png)](https://www.liveavatar.com/?utm_medium=sponsership&utm_campaign=mirotalk) |                                                                                |
-
-</details>
-
-<details>
-<summary>🙏 Past Sponsors</summary>
-
-<br/>
-
-We are grateful to our past sponsors for their support!
-
-|                                                                                        |                                                                 |                                                                         |
-| -------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
-| [![Hetzner](public/sponsors/HetznerLogo.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn) | [![Kiquix](public/sponsors/KiquixLogo.png)](https://kiquix.com) | [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/) |
-| [![LuvLounge](public/sponsors/LuvLounge.png)](https://luvlounge.ca)                    |                                                                 |                                                                         |
-
-</details>
-
-<details>
-<summary>📢 Advertisers</summary>
+---
+
+## What I changed
+
+### Brand and copy
+
+Every user-facing string was rewritten in `app/src/config.js` — `brand.app`, `brand.og`
+and `brand.site`. Page titles, the login screen, the join flow, the waiting room and the
+email invitation all carry the Speakeasy voice rather than the upstream product copy.
+Logo, favicon set and social preview image were produced from scratch.
+
+### Visual design
+
+|  |  |
+| --- | --- |
+| **Theme** | The built-in `dark` theme is overridden with an amber/gold palette — 14 CSS custom properties, `#14110E` background, `#D4AF37` accent. New visitors land on it by default. |
+| **Typography** | Playfair Display for headings across the client, login and waiting room. |
+| **`public/css/aob-login.css`** | 330 lines. Login and waiting-room layout — the pill card, the glow, responsive behaviour. Scoped under an `.aob-auth` body class. |
+| **`public/css/aob-custom.css`** | 215 lines. In-call overrides: gold SweetAlert2 buttons, icon hover states, a Font Awesome → [Phosphor Icons](https://phosphoricons.com/) `@font-face` remap, and element hiding. |
+
+Both stylesheets are new files that do not exist upstream, so upstream never touches them.
+
+### Interface — added
+
+- **`public/js/aob-rooms.js`** — themed generators for room names (`JazzStash4653`) and
+  aliases (`Fingers Slick`), replacing upstream's UUID room names.
+- **"Keep my name secret"** button in the join dialog, plus a randomise button in the
+  profile panel — both draw from the alias generator.
+- **Automatic avatars** — every participant is assigned and persisted a DiceBear
+  `croodles-neutral` avatar on first join, with a 12-avatar picker.
+- **Waiting-room music**, with an autoplay attempt and a first-interaction fallback for
+  browsers that block it.
+
+### Interface — removed
+
+- Chat, the emoji picker and live captions are switched off in `buttons.main`.
+  Whiteboard, recording, screen share and file share stay on.
+- Sponsor, advertiser and support blocks are switched off in `brand.html`.
+- Roughly 1,100 lines of upstream marketing markup were stripped out of seven HTML views
+  and replaced with a single attribution footer.
+- Upstream's 25 self-hosted avatars and six mixed DiceBear styles were reduced to one
+  coherent style.
+
+### Kept on purpose
+
+- The **About** panel still credits Miroslav Pejić by name, with his contact details and
+  copyright line, exactly as upstream ships it.
+- Every page footer carries **"Based on MiroTalk (AGPLv3)"** and a **Source** link back to
+  this repository.
+- `LICENSE` is untouched, and `package.json` still names the original author.
 
 ---
 
-|                                                                                                |                                                                                                |                                                                                 |
-| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| [![Hostinger](public/advertisers/Hostinger.png)](https://hostinger.com/?REFERRALCODE=MIROTALK) | [![Contabo](public/advertisers/Contabo.png)](https://www.dpbolvw.net/click-101027391-14462707) | [![Rambox](public/advertisers/RamboxLogo.png)](https://rambox.app?via=mirotalk) |
+## Operations
+
+**Deployment** — [Coolify](https://coolify.io/) builds the `Dockerfile` on every push to
+`master` and serves it on port 3000 behind an automatic Let's Encrypt certificate. No
+image is published to a registry.
+
+**Health checks** — the container declares a `HEALTHCHECK` against `/brand`, the app's
+no-auth config endpoint (30s interval, 5s timeout, 30s start period, 3 retries). If a new
+deployment never reports healthy, Coolify keeps the previous container serving traffic
+instead of taking the site down.
+
+**Secrets** — every credential and server setting lives in the Coolify environment panel.
+Nothing sensitive is committed; `.env` and local notes are gitignored.
+
+**CI** — upstream's Docker Hub publish job was removed from `.github/workflows/ci.yml`.
+It would have failed without upstream's registry secrets, and on success it would have
+pushed to upstream's own image namespace. The test job stays.
 
 ---
 
-</details>
+## Staying current with upstream
 
-<details open>
-<summary>✨ EffectsSDK</summary>
+A fork nobody merges is a fork that quietly stops receiving security fixes. This one
+merges itself.
 
-[![EffectsSDK](public/sponsors/EffectsSDK.png)](https://effectssdk.ai/)
+`.github/workflows/upstream-sync.yml` runs daily at 04:00 UTC, and on demand:
 
-Enhance your video conferencing with **advanced virtual backgrounds** and **noise suppression**. EffectsSDK offers powerful SDKs and plugins for fast integration.
+1. Fetch `miroslavpejic85/mirotalk` `master`.
+2. Merge it into this fork's `master`.
+3. On a clean merge — push, which triggers a Coolify deploy.
+4. **On a conflict — `git merge --abort` and fail the job.** A half-merged tree never
+   reaches production, and the failure shows up in the Actions tab.
 
-- 🎥 [AI Video Effects Extension](https://chromewebstore.google.com/detail/effetti-webcam-ai-+-regis/iedbphhbpflhgpihkcceocomcdnemcbj): Virtual backgrounds and effects for your webcam
-- 🔊 [Noise Cancelling Extension](https://chromewebstore.google.com/detail/noise-cancelling-app/njmhcidcdbaannpafjdljminaigdgolj): Clearer audio with background noise reduction
-- 🛠️ [Integrate EffectsSDK](https://github.com/EffectsSDK): SDKs and plugins for custom solutions
+Conflicts stay rare by design rather than by luck. Customisations are kept where upstream
+does not reach:
 
-</details>
+| Customisation | Location | Conflict risk |
+| --- | --- | --- |
+| Name, copy, theme, button visibility | `app/src/config.js` | **None** — gitignored upstream, force-added here. Upstream never edits this file. |
+| Login / waiting-room / in-call styling | `public/css/aob-*.css` | **None** — new paths that do not exist upstream. |
+| Room-name and alias generators | `public/js/aob-rooms.js` | **None** — new file. |
+| Health check, sync workflow | `Dockerfile`, `.github/workflows/` | Low — appended, or new files. |
+| Footer attribution, view markup | `public/views/*.html` | Low but real — these are upstream-tracked. |
 
-<br />
+The trade-off: because `config.js` is not tracked upstream, new upstream config keys do
+not arrive automatically. `app/src/config.template.js` has to be diffed against it every
+so often.
 
 ---
 
-This project is tested with [BrowserStack](https://www.browserstack.com).
+## License and attribution
+
+Speakeasy is a derivative work of MiroTalk P2P and is distributed under the **GNU Affero
+General Public License v3.0** — the same licence as the original. The full text is in
+[`LICENSE`](LICENSE), unmodified.
+
+In practice that means:
+
+- **This repository stays public.** AGPLv3 §13 requires that anyone interacting with the
+  software over a network can obtain its source, which is why every page footer links back
+  here.
+- **Attribution is preserved** — in the About panel, in the footer of every page, and in
+  `package.json`.
+- **No commercial licence was purchased.** This deployment runs entirely under the free
+  AGPLv3 terms.
+
+Upstream's marketing, sponsorship and affiliate links have been removed from this README,
+because they belong to upstream and not to this fork. If you want to support the original
+project — and you should, it is genuinely good software — do it at the source:
+
+**Original project:** <https://github.com/miroslavpejic85/mirotalk>
+**Documentation:** <https://docs.mirotalk.com/>
 
 ---
 
-🌐 **Explore all MiroTalk projects:**
-
-**[ → MiroTalk Overview](https://docs.mirotalk.com/overview/)**
-
-![Star History Chart](https://app.repohistory.com/api/svg?repo=miroslavpejic85/mirotalk&type=Date&background=0D1117&color=62C3F8)
-
-<p align="center">
-  Built with ❤️ by <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/">Miroslav</a> and the open-source community
-</p>
+<div align="center">
+<sub>Speakeasy — infrastructure, brand and interface by <a href="https://github.com/aobasar">@aobasar</a>.<br />
+WebRTC platform by <a href="https://github.com/miroslavpejic85">Miroslav Pejić</a>, AGPLv3.</sub>
+</div>

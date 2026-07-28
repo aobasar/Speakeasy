@@ -1,5 +1,17 @@
 # MiroTalk Open Source Community Code of Conduct
 
+> **Note for this fork.** Speakeasy is a fork of
+> [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk) and inherits upstream's Code
+> of Conduct unchanged, because its standards are good ones and there is no reason to
+> rewrite them. Two clarifications:
+>
+> - The MiroTalk Open Source Conduct Committee has no authority over this repository.
+>   Conduct concerns **about this fork** should go to its maintainer,
+>   [@aobasar](https://github.com/aobasar), via a private report on the repository's
+>   [Security tab](https://github.com/aobasar/mirotalk/security) or a GitHub issue.
+> - Conduct concerns about the upstream MiroTalk project belong with upstream, at the
+>   address given in the Enforcement section below.
+
 ## About the Code of Conduct
 
 Equality is a core value at MiroTalk. We believe a diverse and inclusive

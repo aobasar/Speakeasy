@@ -33,6 +33,13 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Enable "ours" merge driver
+        # .gitattributes pins fork-owned files (README, SECURITY, CODE_OF_CONDUCT,
+        # FUNDING) with `merge=ours`. That attribute is inert unless the driver exists —
+        # `true` is a no-op command, which tells git to keep our version. Without this
+        # step every upstream edit to those files would conflict and fail the sync.
+        run: git config merge.ours.driver true
+
       - name: Add upstream and fetch
         run: |
           git remote add upstream https://github.com/miroslavpejic85/mirotalk.git

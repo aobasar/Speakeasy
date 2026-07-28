@@ -1,32 +1,49 @@
 # Security Policy
 
-## Reporting a Vulnerability
+Speakeasy is a fork of [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk).
+Where you report a vulnerability depends on where it lives.
 
-Security is very important to us.
+## Reporting a vulnerability in this fork or its deployment
 
-If you have discovered a security issue, please contact miroslav.pejic.85@gmail.com directly. Please refrain from directly creating a GitHub issue and publicly disclosing the vulnerability.
-We prefer a Coordinated Vulnerability Disclosure (CVD) to properly understand and fix the root cause problem.
+This covers anything specific to Speakeasy — the customisations in `app/src/config.js`,
+the `public/css/aob-*.css` and `public/js/aob-rooms.js` files, the container health check,
+the sync workflow, or the running deployment at `speakeasy.aobprojects.com`.
 
-Your report should include:
+**Report it privately through GitHub:** open the
+[Security tab](https://github.com/aobasar/mirotalk/security) of this repository and use
+**Report a vulnerability**. Please do not open a public issue first — coordinated
+disclosure gives me a chance to fix the root cause before it is public.
 
-- Product version ([GitHub](https://github.com/miroslavpejic85/mirotalk/commits/master) commit hash or [DockerHub](https://hub.docker.com/r/mirotalk/p2p) sha256 digest hash)
-- The affected component if possible (client.js, server.js, etc.)
-- A vulnerability description
+A useful report includes:
+
+- The commit hash this reproduces on
+- The affected component
+- A description of the vulnerability and its impact
 - Reproduction steps
 
-A member of the security team will confirm the vulnerability, determine its impact, and develop a fix.
-The fix will be applied to the master branch, tested, and packaged in the next security release.
+## Reporting a vulnerability in MiroTalk itself
 
-Thanks in advance for your support to make our products safer!
+If the issue is in upstream code — the WebRTC signalling, `app/src/server.js`, the client
+engine, dependencies — it affects every MiroTalk deployment, not just this one. Report it
+to upstream, who can actually ship the fix:
+
+**<https://github.com/miroslavpejic85/mirotalk/blob/master/SECURITY.md>**
+
+I would appreciate a heads-up here as well, so this deployment can be patched once the fix
+lands upstream.
+
+## What this fork does about upstream security fixes
+
+`.github/workflows/upstream-sync.yml` merges `miroslavpejic85/mirotalk` `master` into this
+fork daily and deploys clean merges automatically, so upstream security fixes reach this
+deployment without waiting on manual intervention. If a merge conflicts, the workflow
+aborts and fails rather than shipping a half-merged tree.
 
 ---
 
-## 🙏 Acknowledgements
+## Acknowledgements
 
-We would like to extend our gratitude to the following individuals for their responsible disclosure of security vulnerabilities:
-
-| Name                                                 | Contact                      |
-| ---------------------------------------------------- | ---------------------------- |
-| `Vishal Shukla (@shukla304) and sechub.dev AI Agent` | https://github.com/shukla304 |
-
-Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
+Upstream MiroTalk maintains its own list of researchers who have responsibly disclosed
+vulnerabilities. It is preserved in
+[upstream's SECURITY.md](https://github.com/miroslavpejic85/mirotalk/blob/master/SECURITY.md)
+and their credit belongs there, not here.
