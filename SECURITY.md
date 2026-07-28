@@ -10,7 +10,7 @@ the `public/css/aob-*.css` and `public/js/aob-rooms.js` files, the container hea
 the sync workflow, or the running deployment at `speakeasy.aobprojects.com`.
 
 **Report it privately through GitHub:** open the
-[Security tab](https://github.com/aobasar/mirotalk/security) of this repository and use
+[Security tab](https://github.com/aobasar/speakeasy/security) of this repository and use
 **Report a vulnerability**. Please do not open a public issue first — coordinated
 disclosure gives me a chance to fix the root cause before it is public.
 

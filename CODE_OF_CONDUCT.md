@@ -8,7 +8,7 @@
 > - The MiroTalk Open Source Conduct Committee has no authority over this repository.
 >   Conduct concerns **about this fork** should go to its maintainer,
 >   [@aobasar](https://github.com/aobasar), via a private report on the repository's
->   [Security tab](https://github.com/aobasar/mirotalk/security) or a GitHub issue.
+>   [Security tab](https://github.com/aobasar/speakeasy/security) or a GitHub issue.
 > - Conduct concerns about the upstream MiroTalk project belong with upstream, at the
 >   address given in the Enforcement section below.
 
