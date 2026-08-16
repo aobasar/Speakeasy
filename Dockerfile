@@ -27,6 +27,10 @@ RUN npm ci --omit=dev --silent \
 COPY app app
 COPY public public
 
+# Run as the non-root "node" user (uid/gid 1000) shipped with the base image
+RUN chown -R node:node /src
+USER node
+
 # Health check: app is healthy when /brand (no-auth config endpoint) responds 200.
 # Lets Coolify keep the old container running if a new deploy never becomes healthy.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \

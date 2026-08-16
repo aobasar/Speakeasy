@@ -45,7 +45,7 @@ dependencies: {
  * @license For commercial use or closed source, contact us at license.mirotalk@gmail.com or purchase directly from CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-p2p-webrtc-realtime-video-conferences/38376661
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.75
+ * @version 1.9.01
  *
  */
 
@@ -93,7 +93,9 @@ const loginLimiter = rateLimit({
     message: {
         message: `Too many login attempts. Please try again after ${minBlockTime} minute${minBlockTime == 1 ? '' : 's'}.`,
     },
-    keyGenerator: (req) => req.body?.username || getIP(req),
+    // Throttle by client IP only. A client-supplied username can be varied per
+    // request to get a fresh bucket, defeating the login lockout entirely.
+    keyGenerator: (req) => getIP(req),
 });
 
 const port = config.server.port;
@@ -267,7 +269,7 @@ if (sentryEnabled && typeof sentryDSN === 'string' && sentryDSN.trim()) {
 
 // OpenAI/ChatGPT
 let chatGPT;
-const configChatGPT = config.chatGPT;
+const configChatGPT = config.chatGPT || {};
 if (configChatGPT.enabled) {
     if (configChatGPT.apiKey) {
         const { OpenAI } = require('openai');
@@ -279,6 +281,21 @@ if (configChatGPT.enabled) {
     } else {
         log.warning('ChatGPT seems enabled, but you missing the apiKey!');
     }
+}
+
+// Whisper Speech-to-Text (OpenAI-compatible, server-side transcription).
+// Whisper is an asynchronous SIDE-CHANNEL: it transcribes short audio segments
+// sent by the browser and returns text. It is intentionally NOT part of the
+// WebRTC media path, so it can never block, delay or modify peer audio/video.
+const configWhisper = config.whisper || {};
+const whisperLib = require('./lib/whisper');
+if (configWhisper.enabled) {
+    log.info('Whisper transcription enabled', {
+        basePath: configWhisper.basePath,
+        model: configWhisper.model,
+        language: configWhisper.language || 'auto',
+        segmentSeconds: configWhisper.segmentSeconds,
+    });
 }
 
 // IP Whitelist
@@ -383,7 +400,7 @@ const peers = {}; // collect peers info grp by channels
 const presenters = {}; // collect presenters grp by channels
 const wbLocks = {}; // server-authoritative whiteboard lock state grp by channels
 
-const roomMetaKeys = new Set(['lock', 'password']);
+const roomMetaKeys = new Set(['lock', 'password', 'joinLock']);
 
 function getPeerCount(roomId) {
     if (!peers[roomId]) return 0;
@@ -1232,6 +1249,22 @@ server.listen(port, null, async () => {
     if (jwtCfg.JWT_KEY === 'mirotalk_jwt_secret') {
         log.warn('WARNING: JWT_SECRET is set to the default value. Change it before deploying!');
     }
+    if (hostCfg.protected || hostCfg.user_auth) {
+        const defaultCreds = [
+            { username: 'admin', password: 'admin' },
+            { username: 'guest', password: 'guest' },
+        ];
+        const usesDefaultUsers =
+            Array.isArray(hostCfg.users) &&
+            hostCfg.users.some(
+                (u) => u && defaultCreds.some((d) => u.username === d.username && u.password === d.password)
+            );
+        if (usesDefaultUsers) {
+            log.warn(
+                'WARNING: HOST_USERS still contains default credentials (e.g. admin/admin, guest/guest). Change them!'
+            );
+        }
+    }
 });
 
 /**
@@ -1434,19 +1467,23 @@ io.sockets.on('connect', async (socket) => {
         if (channel in socket.channels) {
             return log.debug('[' + socket.id + '] [Warning] already joined', channel);
         }
-        // no channel aka room in channels init
-        if (!(channel in channels)) channels[channel] = {};
-
-        // no channel aka room in peers init
-        if (!(channel in peers)) peers[channel] = {};
-
-        // no presenter aka host in presenters init
-        if (!(channel in presenters)) presenters[channel] = {};
 
         let is_presenter = true;
 
+        // Is this join opening a brand new room (no presenter/host yet)? Computed from
+        // current state BEFORE any room structure is created, so a rejected join never
+        // leaves an empty room behind (which would otherwise make roomExist true and let
+        // guests bypass host protection over the HTTP /join layer).
+        const isRoomNew = !(channel in presenters) || Object.keys(presenters[channel]).length === 0;
+
+        // Auth is required when global user auth is enabled, when a token is supplied
+        // (always validate it), or when host protection is on and this join would open
+        // a new room. The last case stops unauthenticated Socket.IO clients from creating
+        // protected rooms and becoming presenter, bypassing the HTTP login/waiting-room.
+        const authRequired = hostCfg.user_auth || peer_token || (hostCfg.protected && isRoomNew);
+
         // User Auth required, we check if peer valid
-        if (hostCfg.user_auth || peer_token) {
+        if (authRequired) {
             // Check JWT
             if (peer_token) {
                 try {
@@ -1467,8 +1504,7 @@ io.sockets.on('connect', async (socket) => {
                     }
 
                     // Presenter if token 'presenter' is '1'/'true' or first to join room
-                    is_presenter =
-                        presenter === '1' || presenter === 'true' || Object.keys(presenters[channel]).length === 0;
+                    is_presenter = presenter === '1' || presenter === 'true' || isRoomNew;
 
                     log.debug('[' + socket.id + '] JOIN ROOM - USER AUTH check peer', {
                         ip: peer_ip,
@@ -1487,6 +1523,11 @@ io.sockets.on('connect', async (socket) => {
                 return socket.emit('unauthorized');
             }
         }
+
+        // Auth passed — safe to create the room structures now
+        if (!(channel in channels)) channels[channel] = {};
+        if (!(channel in peers)) peers[channel] = {};
+        if (!(channel in presenters)) presenters[channel] = {};
 
         // room locked by the participants can't join
         if (peers[channel]['lock'] === true && peers[channel]['password'] != channel_password) {
@@ -1537,6 +1578,13 @@ io.sockets.on('connect', async (socket) => {
         // Check if peer is presenter, if token check the presenter key
         const isPresenter = peer_token ? is_presenter : isPeerPresenter(channel, socket.id, peer_name, peer_uuid);
 
+        // Room locked by the host for new participants, only presenters can still join
+        if (peers[channel]['joinLock'] === true && !isPresenter) {
+            log.debug('[' + socket.id + '] [Warning] Room Is Locked for new participants', channel);
+            delete presenters[channel][socket.id];
+            return socket.emit('roomIsJoinLocked');
+        }
+
         // Some peer info data
         const { osName, osVersion, browserName, browserVersion, extras } = peer_info;
 
@@ -1579,6 +1627,7 @@ io.sockets.on('connect', async (socket) => {
             host_protected: hostCfg.protected,
             user_auth: hostCfg.user_auth,
             is_presenter: isPresenter,
+            join_locked: peers[channel]['joinLock'] === true,
             survey: {
                 active: surveyEnabled,
                 url: surveyURL,
@@ -1588,6 +1637,12 @@ io.sockets.on('connect', async (socket) => {
                 url: redirectURL,
             },
             maxRoomParticipants: hostCfg.maxRoomParticipants,
+            // Whisper is exposed as a capability flag + segment length only.
+            // The API key/basePath are server-side secrets and are never sent.
+            whisper: {
+                enabled: configWhisper.enabled,
+                segmentSeconds: configWhisper.segmentSeconds,
+            },
             //...
         });
 
@@ -1694,6 +1749,22 @@ io.sockets.on('connect', async (socket) => {
                         action: action,
                     });
                     break;
+                case 'joinLockOn':
+                    if (!isPresenter) return;
+                    peers[room_id]['joinLock'] = true;
+                    await sendToRoom(room_id, socket.id, 'roomAction', {
+                        peer_name: peer_name,
+                        action: action,
+                    });
+                    break;
+                case 'joinLockOff':
+                    if (!isPresenter) return;
+                    delete peers[room_id]['joinLock'];
+                    await sendToRoom(room_id, socket.id, 'roomAction', {
+                        peer_name: peer_name,
+                        action: action,
+                    });
+                    break;
                 case 'checkPassword':
                     const data = {
                         peer_name: peer_name,
@@ -1764,6 +1835,15 @@ io.sockets.on('connect', async (socket) => {
 
         if (!Validate.isValidData(data)) return;
 
+        // Security: only a joined peer of the room may broadcast into it.
+        if (!isPeerInRoom(data.room_id, socket.id)) {
+            log.debug('message blocked: sender is not a joined peer', {
+                room_id: data.room_id,
+                socket_id: socket.id,
+            });
+            return;
+        }
+
         await sendToRoom(data.room_id, socket.id, 'message', data);
     });
 
@@ -1784,6 +1864,12 @@ io.sockets.on('connect', async (socket) => {
         const { room_id, peer_name, peer_uuid, to_peer_id } = data;
 
         log.debug('cmd', config);
+
+        // Security: only a joined peer of the room may relay commands into it.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            log.debug('cmd blocked: sender is not a joined peer', { room_id, socket_id: socket.id });
+            return;
+        }
 
         // Only the presenter can do this actions
         const presenterActions = ['geoLocation'];
@@ -1817,6 +1903,12 @@ io.sockets.on('connect', async (socket) => {
 
         // log.debug('Peer status', config);
         const { room_id, peer_name, peer_id, element, status, extras } = config;
+
+        // Security: only a joined peer of the room may broadcast status into it.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            log.debug('peerStatus blocked: sender is not a joined peer', { room_id, socket_id: socket.id });
+            return;
+        }
 
         const data = {
             peer_id: peer_id,
@@ -1885,6 +1977,12 @@ io.sockets.on('connect', async (socket) => {
             send_to_all,
         } = config;
 
+        // Security: only a joined peer of the room may relay actions into it.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            log.debug('peerAction blocked: sender is not a joined peer', { room_id, socket_id: socket.id });
+            return;
+        }
+
         // Only the presenter can do this actions
         const presenterActions = ['muteAudio', 'hideVideo', 'ejectAll', 'stopScreen', 'recStart', 'recStop'];
         if (presenterActions.some((v) => peer_action === v)) {
@@ -1924,7 +2022,109 @@ io.sockets.on('connect', async (socket) => {
 
         if (!Validate.isValidData(config)) return;
 
-        await sendToRoom(cfg.room_id, sockets, 'caption', config);
+        const { room_id } = config;
+
+        // Security: only a joined peer of the room may broadcast captions into it.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            log.debug('caption blocked: sender is not a joined peer', { room_id, socket_id: socket.id });
+            return;
+        }
+
+        await sendToRoom(room_id, socket.id, 'caption', config);
+    });
+
+    /**
+     * Whisper speech-to-text (OpenAI API or any OpenAI-compatible self-hosted server).
+     *
+     * This is an ASYNC SIDE-CHANNEL and is completely independent from the WebRTC
+     * media path: the browser records a short segment from a SECONDARY copy of the
+     * local microphone, sends it here for transcription, and distributes the
+     * resulting text to peers over the WebRTC DataChannel. Peer audio/video is never
+     * routed through Whisper, so call latency does not depend on Whisper latency.
+     *
+     * The Whisper API key lives only in server config and is NEVER sent to the browser.
+     * https://platform.openai.com/docs/api-reference/audio/createTranscription
+     */
+    socket.on('getWhisperTranscription', async ({ room_id, audio, mimeType, language } = {}, cb) => {
+        if (typeof cb !== 'function') return;
+
+        // Security: only a joined peer of the room may use the transcription proxy.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            return cb({ error: 'Room not found' });
+        }
+
+        if (!configWhisper.enabled) {
+            return cb({ error: 'Whisper transcription is disabled. Please try again later!' });
+        }
+
+        try {
+            // 1. Validate + decode the base64 audio payload and enforce the
+            //    configured max size (defense against oversized uploads).
+            const buffer = whisperLib.decodeAudioPayload(audio, configWhisper.maxAudioBytes);
+
+            // 2. Restrict to a small allow-list of audio MIME types and map to a file extension.
+            const type = typeof mimeType === 'string' && mimeType.startsWith('audio/') ? mimeType : 'audio/webm';
+            const ext = whisperLib.resolveAudioExtension(type);
+
+            // 3. Build the multipart/form-data request expected by the OpenAI-compatible /audio/transcriptions endpoint
+            const FormData = require('form-data');
+            const form = new FormData();
+            form.append('file', buffer, { filename: `segment.${ext}`, contentType: type });
+            form.append('model', configWhisper.model || 'whisper-1');
+            form.append('response_format', 'verbose_json');
+
+            // Per-request language hint wins over the server default; empty = auto-detect.
+            const lang = typeof language === 'string' && language ? language : configWhisper.language;
+            if (lang) form.append('language', lang);
+
+            const headers = { ...form.getHeaders() };
+            // Only attach auth when configured (self-hosted servers may not require it).
+            if (configWhisper.apiKey) headers['Authorization'] = `Bearer ${configWhisper.apiKey}`;
+
+            // basePath comes from trusted server config only; we just append the fixed path.
+            const base = (configWhisper.basePath || 'https://api.openai.com/v1/').replace(/\/?$/, '/');
+            const url = `${base}audio/transcriptions`;
+
+            const response = await axios.post(url, form, {
+                headers,
+                timeout: 30000,
+                maxBodyLength: Infinity,
+                maxContentLength: Infinity,
+            });
+
+            // Support both the OpenAI shape ({ text }) and plain-string/verbose responses.
+            const raw = response.data && typeof response.data === 'object' ? response.data.text : response.data;
+            const detectedLanguage =
+                (response.data && typeof response.data === 'object' && response.data.language) || lang || '';
+
+            // 4. Filter Whisper hallucinations + low-confidence/no-speech output on
+            //    silent/near-silent audio.
+            const segments = Array.isArray(response.data?.segments) ? response.data.segments : [];
+            const text = whisperLib.filterTranscript(typeof raw === 'string' ? raw : '', segments);
+
+            // Do NOT log raw audio, API keys, or full transcripts. Metadata only.
+            log.debug('Whisper transcription', {
+                room_id,
+                language: detectedLanguage || 'auto',
+                bytes: buffer.length,
+                chars: text.length,
+            });
+
+            cb({ text, language: detectedLanguage });
+        } catch (error) {
+            // Never leak API credentials or upstream URLs to the client.
+            const safeMessage = error?.response?.status
+                ? `Whisper request failed (HTTP ${error.response.status})`
+                : error?.code === 'ECONNABORTED'
+                  ? 'Whisper request timed out'
+                  : error?.message || 'Whisper transcription failed';
+            log.error('Whisper transcription error', {
+                room_id,
+                status: error?.response?.status,
+                message: error?.message,
+            });
+            cb({ error: safeMessage });
+        }
     });
 
     /**
@@ -1938,7 +2138,7 @@ io.sockets.on('connect', async (socket) => {
 
         // peer_id here is the TARGET to kick; the caller's identity is the
         // server-controlled socket.id, not anything the client supplies.
-        const { room_id, peer_id, peer_uuid, peer_name } = config;
+        const { room_id, peer_id, peer_uuid, peer_name, peer_kicked_reason } = config;
 
         // Authorize the caller using socket.id to prevent role spoofing.
         const isPresenter = isPeerPresenter(room_id, socket.id, peer_name, peer_uuid);
@@ -1949,6 +2149,7 @@ io.sockets.on('connect', async (socket) => {
 
             await sendToPeer(peer_id, sockets, 'kickOut', {
                 peer_name: peer_name,
+                peer_kicked_reason: peer_kicked_reason,
             });
         }
     });
@@ -1964,6 +2165,12 @@ io.sockets.on('connect', async (socket) => {
 
         // log.debug('File info', config);
         const { room_id, peer_id, peer_name, peer_avatar, broadcast, file } = config;
+
+        // Security: only a joined peer of the room may share file info into it.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            log.debug('fileInfo blocked: sender is not a joined peer', { room_id, socket_id: socket.id });
+            return;
+        }
 
         // check if valid fileName
         if (!isValidFileName(file.fileName)) {
@@ -2005,6 +2212,12 @@ io.sockets.on('connect', async (socket) => {
 
         const { room_id, peer_name } = config;
 
+        // Security: only a joined peer of the room may broadcast into it.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            log.debug('fileAbort blocked: sender is not a joined peer', { room_id, socket_id: socket.id });
+            return;
+        }
+
         log.debug('[' + socket.id + '] Peer [' + peer_name + '] send fileAbort to room_id [' + room_id + ']');
         await sendToRoom(room_id, socket.id, 'fileAbort');
     });
@@ -2015,6 +2228,13 @@ io.sockets.on('connect', async (socket) => {
         if (!Validate.isValidData(config)) return;
 
         const { room_id, peer_name } = config;
+
+        // Security: only a joined peer of the room may broadcast into it.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            log.debug('fileReceiveAbort blocked: sender is not a joined peer', { room_id, socket_id: socket.id });
+            return;
+        }
+
         log.debug('[' + socket.id + '] Peer [' + peer_name + '] send fileReceiveAbort to room_id [' + room_id + ']');
         await sendToRoom(room_id, socket.id, 'fileReceiveAbort', config);
     });
@@ -2030,6 +2250,12 @@ io.sockets.on('connect', async (socket) => {
 
         // log.debug('Video player', config);
         const { room_id, peer_id, peer_name, video_action, video_src, broadcast } = config;
+
+        // Security: only a joined peer of the room may drive the shared video player.
+        if (!isPeerInRoom(room_id, socket.id)) {
+            log.debug('videoPlayer blocked: sender is not a joined peer', { room_id, socket_id: socket.id });
+            return;
+        }
 
         // Check if valid video src url
         if (video_action == 'open' && !isValidHttpURL(video_src)) {
@@ -2295,13 +2521,20 @@ function isValidFileName(fileName) {
 
 /**
  * Check if valid URL
+ * Rejects non-http(s) schemes and, to prevent browser-side SSRF, any host
+ * that is localhost or a private / loopback / link-local / reserved IP.
  * @param {string} str to check
  * @returns boolean true/false
  */
 function isValidHttpURL(input) {
     try {
         const url = new URL(input);
-        return url.protocol === 'http:' || url.protocol === 'https:';
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') return false;
+        const host = url.hostname.toLowerCase().replace(/^\[|\]$/g, '');
+        if (!host) return false;
+        if (host === 'localhost' || host.endsWith('.localhost')) return false;
+        if (Validate.isPrivateOrLoopbackHost(host)) return false;
+        return true;
     } catch (_) {
         return false;
     }
@@ -2321,6 +2554,19 @@ async function getPeerGeoLocation(ip) {
         .get(endpoint)
         .then((response) => response.data)
         .catch((error) => log.error(error));
+}
+
+/**
+ * Check if a socket is a joined peer of the given room.
+ * Room broadcasts (message, caption, peerStatus, fileInfo, videoPlayer, ...)
+ * must be authorized against the server-controlled socket.id so a socket that
+ * never joined the room cannot inject events into it (cross-room injection).
+ * @param {string} room_id
+ * @param {string} socket_id server-controlled socket.id of the caller
+ * @returns {boolean}
+ */
+function isPeerInRoom(room_id, socket_id) {
+    return !!(room_id && peers[room_id] && peers[room_id][socket_id]);
 }
 
 /**

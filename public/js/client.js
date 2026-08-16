@@ -15,7 +15,7 @@
  * @license For commercial use or closed source, contact us at license.mirotalk@gmail.com or purchase directly from CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-p2p-webrtc-realtime-video-conferences/38376661
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.75
+ * @version 1.9.01
  *
  */
 
@@ -356,6 +356,8 @@ const captionDropDownMenuBtn = getId('captionDropDownMenuBtn');
 const captionDropDownContent = getId('captionDropDownContent');
 const transcriptShowOnMsgEl = getId('transcriptShowOnMsg');
 const transcriptSendToAllEl = getId('transcriptSendToAll');
+const transcriptWhisperModeEl = getId('transcriptWhisperMode');
+const transcriptWhisperLi = getId('transcriptWhisperLi');
 const captionChat = getId('captionChat');
 const captionEmptyNotice = getId('captionEmptyNotice');
 const captionFooter = getId('captionFooter');
@@ -398,6 +400,8 @@ const audioInputSelect = getId('audioSource');
 const audioOutputSelect = getId('audioOutput');
 const audioOutputDiv = getId('audioOutputDiv');
 const speakerTestBtn = getId('speakerTestBtn');
+const speakerVolume = getId('speakerVolume');
+const speakerVolumeValue = getId('speakerVolumeValue');
 const videoSelect = getId('videoSource');
 const videoQualitySelect = getId('videoQuality');
 const videoFpsSelect = getId('videoFps');
@@ -482,6 +486,8 @@ const ejectEveryoneBtnDesktop = getId('ejectEveryoneBtnDesktop');
 const activeRoomsBtn = getId('activeRoomsBtn');
 const lockRoomBtn = getId('lockRoomBtn');
 const unlockRoomBtn = getId('unlockRoomBtn');
+const joinLockBtn = getId('joinLockBtn');
+const joinUnlockBtn = getId('joinUnlockBtn');
 
 // File send progress
 const sendFileDiv = getId('sendFileDiv');
@@ -649,6 +655,10 @@ let peerScreenMediaElements = {}; // keep track of our peer <video> tags, indexe
 let peerVideoMediaElements = {}; // keep track of our peer <video> tags, indexed by peer_id_video
 let peerAudioMediaElements = {}; // keep track of our peer <audio> tags, indexed by peer_id_audio
 
+let masterOutputVolume = 1; // 0..1 master speaker volume, multiplied with each per-peer volume
+let elementVolumeWritable; // HTMLMediaElement.volume is read-only on iOS
+let outputAudioContext = null; // used to control the output volume where volume is read-only
+
 // main and bottom buttons
 let mainButtonsBarPosition = 'vertical'; // vertical - horizontal
 let placement = 'right'; // https://atomiks.github.io/tippyjs/#placements
@@ -727,6 +737,7 @@ let screenFpsSelectedIndex = 1; // 30 fps
 let isMySettingsVisible = false;
 let thisRoomPassword = null;
 let isRoomLocked = false;
+let isJoinLocked = false;
 let isKeepButtonsVisible = false;
 let isAudioPitchBar = true;
 let isPushToTalkActive = false;
@@ -738,7 +749,9 @@ let themeCardDebounce = null;
 let mediaRecorder;
 let recordedBlobs;
 let audioRecorder; // helpers.js
+let screenAudioRecorder; // helpers.js - mixes participant audio with system/tab audio
 let recScreenStream; // screen media to recording
+let recScreenAudioTracks = []; // raw system/tab audio tracks to stop on recording end
 let recTimer;
 let recCodecs;
 let recElapsedTime;
@@ -877,6 +890,11 @@ function setButtonsToolTip() {
     setTippy(captionTogglePin, 'Toggle caption pin', 'bottom');
     setTippy(captionTheme, 'Ghost theme', 'bottom');
     setTippy(transcriptSendToAllEl, 'When enabled, your transcription will be sent to all participants', 'bottom');
+    setTippy(
+        transcriptWhisperModeEl,
+        'When enabled, uses server-side Whisper for higher accuracy transcription',
+        'bottom'
+    );
     setTippy(speechRecognitionIcon, 'Status', 'bottom');
     setTippy(speechRecognitionStart, 'Start caption', 'top');
     setTippy(speechRecognitionStop, 'Stop caption', 'top');
@@ -1470,6 +1488,7 @@ async function initClientPeer() {
     signalingSocket.on('connect', handleConnect);
     signalingSocket.on('unauthorized', handleUnauthorized);
     signalingSocket.on('roomIsLocked', handleUnlockTheRoom);
+    signalingSocket.on('roomIsJoinLocked', handleRoomJoinLocked);
     signalingSocket.on('roomAction', handleRoomAction);
     signalingSocket.on('addPeer', handleAddPeer);
     signalingSocket.on('serverInfo', handleServerInfo);
@@ -1560,7 +1579,8 @@ async function handleConnect() {
 function handleServerInfo(config) {
     console.log('13. Server info', config);
 
-    const { peers_count, host_protected, user_auth, is_presenter, survey, redirect, maxRoomParticipants } = config;
+    const { peers_count, host_protected, user_auth, is_presenter, survey, redirect, maxRoomParticipants, join_locked } =
+        config;
 
     isHostProtected = host_protected;
     isPeerAuthEnabled = user_auth;
@@ -1573,6 +1593,13 @@ function handleServerInfo(config) {
     redirectActive = redirect.active;
     redirectURL = redirect.url;
 
+    // Whisper (server-side) transcription capability. Only a capability flag +
+    // segment length are sent; the API key/basePath stay on the server.
+    if (config.whisper && typeof setWhisperServerConfig === 'function') {
+        setWhisperServerConfig(config.whisper);
+        applyWhisperUiAvailability();
+    }
+
     // Limit room to n peers
     if (maxRoomParticipants) thisMaxRoomParticipants = maxRoomParticipants;
     if (peers_count > thisMaxRoomParticipants) {
@@ -1581,6 +1608,7 @@ function handleServerInfo(config) {
 
     // Let start with some basic rules
     isPresenter = is_presenter;
+    isJoinLocked = join_locked === true;
     console.log('New connection - presenter status from server:', isPresenter);
     isPeerPresenter.innerText = isPresenter;
 
@@ -1708,7 +1736,10 @@ function handleButtonsRule() {
         { element: recImage, display: buttons.main.showRecordStreamBtn },
         { element: chatRoomBtn, display: buttons.main.showChatRoomBtn },
         { element: participantsBtn, display: buttons.main.showParticipantsBtn },
-        { element: captionBtn, display: buttons.main.showCaptionRoomBtn && speechRecognition }, // auto-detected
+        {
+            element: captionBtn,
+            display: buttons.main.showCaptionRoomBtn && (speechRecognition || isWhisperAvailable()),
+        }, // auto-detected
         { element: roomEmojiPickerBtn, display: buttons.main.showRoomEmojiPickerBtn },
         { element: myHandBtn, display: buttons.main.showMyHandBtn },
         { element: whiteboardBtn, display: buttons.main.showWhiteboardBtn },
@@ -1769,6 +1800,8 @@ function handleButtonsRule() {
         { element: tabEmailInvitation, display: buttons.settings.showTabEmailInvitation },
         { element: noiseSuppressionBtn, display: buttons.settings.customNoiseSuppression && isRNNoiseSupported },
     ]);
+
+    updateJoinLockButtons();
 
     // Whiteboard
     elemDisplay(
@@ -2671,6 +2704,46 @@ async function restartNoiseSuppression() {
     // Do not restore the old microphone stream when restarting.
     await disableNoiseSuppression(false);
     await enableNoiseSuppression();
+}
+
+/**
+ * Apply the noise suppression state and keep all UI toggles in sync.
+ * Shared by the audio settings switch and the audio dropdown menu switch.
+ * Returns the final effective state.
+ */
+async function applyNoiseSuppression(enabled) {
+    if (!buttons.settings.customNoiseSuppression) return false;
+
+    if (enabled) {
+        lsSettings.mic_noise_suppression = true;
+        lS.setSettings(lsSettings);
+
+        const ok = await enableNoiseSuppression();
+        if (!ok) {
+            lsSettings.mic_noise_suppression = false;
+            lS.setSettings(lsSettings);
+        } else {
+            toastMessage('success', 'Noise suppression enabled');
+        }
+    } else {
+        lsSettings.mic_noise_suppression = false;
+        lS.setSettings(lsSettings);
+        await disableNoiseSuppression(true);
+        toastMessage('info', 'Noise suppression disabled');
+    }
+
+    syncNoiseSuppressionUI();
+    return lsSettings.mic_noise_suppression;
+}
+
+/**
+ * Reflect the current noise suppression state on every UI toggle.
+ */
+function syncNoiseSuppressionUI() {
+    const state = !!lsSettings.mic_noise_suppression;
+    if (switchNoiseSuppression) switchNoiseSuppression.checked = state;
+    const menuToggle = getId('audioMenuNoiseSuppression');
+    if (menuToggle) menuToggle.checked = state;
 }
 
 /**
@@ -5112,6 +5185,7 @@ async function loadRemoteMediaStream(stream, peers, peer_id, kind) {
             const remoteAudioVolumeEl = getId(remoteAudioVolumeId);
             remoteAudioMedia.id = peer_id + '___audio';
             remoteAudioMedia.volume = 1.0;
+            remoteAudioMedia.dataset.peerVolume = 1;
             remoteAudioMedia.autoplay = true;
             remoteAudioMedia.controls = false;
 
@@ -5123,6 +5197,7 @@ async function loadRemoteMediaStream(stream, peers, peer_id, kind) {
             audioMediaContainer.appendChild(remoteAudioWrap);
             attachMediaStream(remoteAudioMedia, stream);
             peerAudioMediaElements[remoteAudioMedia.id] = remoteAudioWrap;
+            applyOutputVolume(remoteAudioMedia);
 
             // Explicitly play audio to ensure it starts (handles autoplay policies)
             remoteAudioMedia.play().catch((err) => {
@@ -6321,6 +6396,17 @@ function setRecordStreamBtn() {
 }
 
 /**
+ * Update the record button label, preserving its icon
+ * @param {string} label text to display
+ */
+function setRecordStreamBtnLabel(label) {
+    const icon = recordStreamBtn.querySelector('i');
+    recordStreamBtn.textContent = '';
+    if (icon) recordStreamBtn.appendChild(icon);
+    recordStreamBtn.appendChild(document.createTextNode(' ' + label));
+}
+
+/**
  * Full screen button click event
  */
 function setFullScreenBtn() {
@@ -6369,6 +6455,12 @@ function setChatRoomBtn() {
     });
 
     msgerSidebarCloseBtn?.addEventListener('click', () => {
+        // Chat was opened only to show participants: close everything instead of leaving the chat visible.
+        if (isChatOpenedByParticipantsBtn) {
+            hideChatRoomAndEmojiPicker();
+            closeAllMsgerParticipantDropdownMenus();
+            return;
+        }
         msgerDraggable.classList.remove('msger-pinned-sidebar-open');
         msgerCPBtn.classList.remove('active');
         syncChatToolbarButtons();
@@ -6760,6 +6852,18 @@ function setCaptionRoomBtn() {
             lS.setSettings(lsSettings);
         });
 
+        // Whisper mode: switch between Web Speech API and server-side Whisper.
+        // The WebRTC call is never affected by this toggle.
+        transcriptWhisperModeEl?.addEventListener('change', (e) => {
+            playSound('switch');
+            const enabled = setWhisperMode(e.currentTarget.checked);
+            // setWhisperMode may refuse while a transcription is running.
+            e.currentTarget.checked = enabled;
+            enabled
+                ? msgPopup('info', 'Server-side Whisper transcription enabled', 'top-end', 3000)
+                : msgPopup('info', 'Using browser Web Speech transcription', 'top-end', 3000);
+        });
+
         // close caption box - show left button and status menu if hide
         captionClose.addEventListener('click', (e) => {
             captionMinimize();
@@ -6770,22 +6874,75 @@ function setCaptionRoomBtn() {
         // hide it
         elemDisplay(speechRecognitionStop, false);
 
-        if (speechRecognition) {
-            // start recognition speech
-            speechRecognitionStart.addEventListener('click', (e) => {
-                startSpeech();
-            });
-            // stop recognition speech
-            speechRecognitionStop.addEventListener('click', (e) => {
-                stopSpeech();
-            });
-        } else {
-            elemDisplay(captionFooter, false);
-        }
+        // Start/stop transcription. Handlers branch on the selected mode so the
+        // same buttons drive either the Web Speech API or server-side Whisper.
+        speechRecognitionStart.addEventListener('click', (e) => {
+            // Transcription can only capture speech when the microphone is on.
+            if (!myAudioStatus) {
+                confirmTranscriptionStartWithAudioOff();
+                return;
+            }
+            startTranscription();
+        });
+        speechRecognitionStop.addEventListener('click', (e) => {
+            if (whisperMode) return stopWhisperTranscription();
+            if (speechRecognition) stopSpeech();
+        });
+        elemDisplay(captionFooter, !!speechRecognition || isWhisperAvailable(), 'flex');
     } else {
         elemDisplay(captionBtn, false);
         // https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API#browser_compatibility
     }
+}
+
+/**
+ * Start transcription using the selected mode (Web Speech API or server-side Whisper).
+ */
+function startTranscription() {
+    if (whisperMode) return startWhisperTranscription();
+    if (speechRecognition) startSpeech();
+}
+
+/**
+ * Transcription can only capture speech when the microphone is on. Ask the user
+ * to turn it on before starting.
+ */
+function confirmTranscriptionStartWithAudioOff() {
+    Swal.fire({
+        allowOutsideClick: false,
+        background: swBg,
+        position: 'center',
+        imageUrl: images.caption,
+        title: 'Your microphone is off',
+        text: 'Transcription needs your microphone on to capture your speech. Turn it on to start transcribing.',
+        showDenyButton: true,
+        confirmButtonText: 'Turn on microphone',
+        denyButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            if (!myAudioStatus && audioBtn) {
+                audioBtn.click();
+            }
+            startTranscription();
+        }
+    });
+}
+
+/**
+ * Reveal the transcription UI when the server offers Whisper, even if the
+ * browser has no Web Speech API. Called once server info is received.
+ */
+function applyWhisperUiAvailability() {
+    if (!isWhisperAvailable()) return;
+    if (transcriptWhisperLi) transcriptWhisperLi.classList.remove('hidden');
+    if (buttons.main.showCaptionRoomBtn) {
+        elemDisplay(captionBtn, true);
+        elemDisplay(captionFooter, true, 'flex');
+    }
+    // Hide the Web-Speech-only language/dialect selectors when they are irrelevant.
+    updateTranscriptionSelectsVisibility();
 }
 
 /**
@@ -7712,26 +7869,7 @@ function setupMySettings() {
     // audio options
     switchNoiseSuppression.onchange = async (e) => {
         if (!buttons.settings.customNoiseSuppression) return;
-        const desired = e.currentTarget.checked;
-
-        if (desired) {
-            lsSettings.mic_noise_suppression = true;
-            lS.setSettings(lsSettings);
-
-            const ok = await enableNoiseSuppression();
-            if (!ok) {
-                lsSettings.mic_noise_suppression = false;
-                lS.setSettings(lsSettings);
-                switchNoiseSuppression.checked = false;
-            } else {
-                toastMessage('success', 'Noise suppression enabled');
-            }
-        } else {
-            lsSettings.mic_noise_suppression = false;
-            lS.setSettings(lsSettings);
-            await disableNoiseSuppression(true);
-            toastMessage('info', 'Noise suppression disabled');
-        }
+        await applyNoiseSuppression(e.currentTarget.checked);
         switchNoiseSuppression.blur();
     };
 
@@ -7740,6 +7878,16 @@ function setupMySettings() {
         await changeAudioDestination();
         refreshLsDevices();
     });
+    // speaker master output volume
+    if (speakerVolume) {
+        speakerVolume.oninput = () => {
+            setSpeakerVolume(speakerVolume.value);
+        };
+        speakerVolume.onchange = () => {
+            lsSettings.speaker_volume = Number(speakerVolume.value);
+            lS.setSettings(lsSettings);
+        };
+    }
     // select video input
     videoSelect.addEventListener('change', async () => {
         await changeLocalCamera(videoSelect.value);
@@ -7865,6 +8013,12 @@ function setupMySettings() {
     });
     unlockRoomBtn.addEventListener('click', (e) => {
         handleRoomAction({ action: 'unlock' }, true);
+    });
+    joinLockBtn.addEventListener('click', (e) => {
+        confirmJoinLock(true);
+    });
+    joinUnlockBtn.addEventListener('click', (e) => {
+        confirmJoinLock(false);
     });
 }
 
@@ -8049,6 +8203,8 @@ function loadSettingsFromLocalStorage() {
     themeCustom.input.value = themeCustom.color;
 
     switchNoiseSuppression.checked = lsSettings.mic_noise_suppression;
+
+    setSpeakerVolume(lsSettings.speaker_volume !== undefined ? lsSettings.speaker_volume : 100);
 
     videoObjFitSelect.selectedIndex = lsSettings.video_obj_fit;
     btnsBarSelect.selectedIndex = lsSettings.buttons_bar;
@@ -9658,6 +9814,7 @@ function startDesktopRecording(options, audioMixerTracks) {
     // Define constraints for capturing the screen
     const constraints = {
         video: { frameRate: { max: 30 } }, // Recording max 30fps
+        audio: true, // Allow capturing system/tab audio when the user shares it
     };
 
     // Request access to screen capture using the specified constraints
@@ -9668,6 +9825,10 @@ function startDesktopRecording(options, audioMixerTracks) {
             const screenTracks = screenStream.getVideoTracks();
             console.log('Screen video tracks --->', screenTracks);
 
+            // Get system/tab audio tracks the user chose to share (if any)
+            const screenAudioTracks = screenStream.getAudioTracks();
+            console.log('Screen audio tracks --->', screenAudioTracks);
+
             // Create an array to combine screen tracks and audio mixer tracks
             const combinedTracks = [];
 
@@ -9676,10 +9837,22 @@ function startDesktopRecording(options, audioMixerTracks) {
                 combinedTracks.push(...screenTracks);
             }
 
-            // Add audio mixer tracks to combinedTracks if available
+            // Determine the audio to record: participant mix, plus system/tab audio if shared
+            let recordAudioTracks = [];
             if (useAudio && Array.isArray(audioMixerTracks)) {
-                combinedTracks.push(...audioMixerTracks);
+                recordAudioTracks = [...audioMixerTracks];
             }
+            if (screenAudioTracks.length > 0) {
+                // MediaRecorder encodes only one audio track, so mix participant + system/tab audio into one
+                screenAudioRecorder = new MixedAudioRecorder();
+                const streamsToMix = [
+                    ...recordAudioTracks.map((track) => new MediaStream([track])),
+                    ...screenAudioTracks.map((track) => new MediaStream([track])),
+                ];
+                recordAudioTracks = screenAudioRecorder.getMixedAudioStream(streamsToMix).getTracks();
+                recScreenAudioTracks = screenAudioTracks; // keep raw tracks to stop them on recording end
+            }
+            combinedTracks.push(...recordAudioTracks);
 
             // Create a new MediaStream using the combinedTracks
             recScreenStream = new MediaStream(combinedTracks);
@@ -9790,6 +9963,7 @@ function handleMediaRecorderStart(event) {
     isStreamRecording = true;
     const recordStreamIcon = recordStreamBtn.querySelector('i');
     recordStreamIcon.style.setProperty('color', '#ff4500');
+    setRecordStreamBtnLabel('Stop Recording');
     if (isMobileDevice) elemDisplay(swapCameraBtn, false);
     recStartTs = performance.now();
     playSound('recStart');
@@ -9824,9 +9998,19 @@ function handleMediaRecorderStop(event) {
         });
         isRecScreenStream = false;
     }
+    // Stop system/tab audio capture and its mixer, if used
+    if (recScreenAudioTracks.length) {
+        recScreenAudioTracks.forEach((track) => track.stop());
+        recScreenAudioTracks = [];
+    }
+    if (screenAudioRecorder) {
+        screenAudioRecorder.stopMixedAudioStream();
+        screenAudioRecorder = null;
+    }
 
     const recordStreamIcon = recordStreamBtn.querySelector('i');
     recordStreamIcon.style.setProperty('color', '#ffffff');
+    setRecordStreamBtnLabel('Start Recording');
     downloadRecordedStream();
 
     if (isMobileDevice) elemDisplay(swapCameraBtn, true, 'block');
@@ -10929,6 +11113,9 @@ function handleSpeechTranscript(config) {
 
     const { peer_name, peer_avatar, text_data } = config;
 
+    // Optional detected/source language (present for Whisper transcripts).
+    const language = config.language ? filterXSS(String(config.language)) : '';
+
     const time_stamp = getFormatDate(new Date());
 
     const avatar_image =
@@ -10947,7 +11134,7 @@ function handleSpeechTranscript(config) {
     const captionAvatarTmpId = `capt-av-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
     const msgHTML = renderRoomTemplate('tpl-caption-message', {
         text: {
-            captionInfoText: `${peer_name} : ${time_stamp}`,
+            captionInfoText: language ? `${peer_name} (${language}) : ${time_stamp}` : `${peer_name} : ${time_stamp}`,
             captionText: text_data,
         },
         attrs: {
@@ -12881,10 +13068,140 @@ function handleAudioVolume(audioVolumeId, mediaId) {
         audioVolume.style.cursor = 'pointer';
         audioVolume.value = 100;
         audioVolume.addEventListener('input', () => {
-            media.volume = audioVolume.value / 100;
+            media.dataset.peerVolume = audioVolume.value / 100;
+            applyOutputVolume(media);
         });
     } else {
         if (audioVolume) elemDisplay(audioVolume, false);
+    }
+}
+
+// ####################################################
+// MASTER OUTPUT (SPEAKER) VOLUME
+// ####################################################
+
+/**
+ * Set the master output volume from the settings/device menu slider
+ * @param {number|string} value volume 0-100
+ */
+function setSpeakerVolume(value) {
+    const volume = Math.min(100, Math.max(0, Number(value) || 0));
+
+    if (speakerVolume) speakerVolume.value = volume;
+    if (speakerVolumeValue) speakerVolumeValue.textContent = `${volume}%`;
+
+    const menuSlider = getId('audioMenuSpeakerVolume');
+    if (menuSlider) menuSlider.value = volume;
+    const menuValue = getId('audioMenuSpeakerVolumeValue');
+    if (menuValue) menuValue.textContent = `${volume}%`;
+
+    setMasterOutputVolume(volume / 100);
+}
+
+/**
+ * Get all the remote peers audio elements
+ * @returns {Array<HTMLAudioElement>}
+ */
+function getOutputAudioElements() {
+    return Array.from(audioMediaContainer?.querySelectorAll('audio[data-peer-volume]') || []);
+}
+
+/**
+ * Apply the master output volume to all the remote peers audio elements
+ * @param {number} volume 0-1
+ */
+function setMasterOutputVolume(volume) {
+    const value = Number(volume);
+    masterOutputVolume = Math.min(1, Math.max(0, isNaN(value) ? 1 : value));
+    getOutputAudioElements().forEach((elem) => applyOutputVolume(elem));
+}
+
+/**
+ * Apply per-peer volume multiplied by the master output volume
+ * @param {HTMLAudioElement} audioPlayer
+ */
+function applyOutputVolume(audioPlayer) {
+    if (!audioPlayer) return;
+
+    const peerVolume = Number(audioPlayer.dataset.peerVolume);
+    const volume = Math.min(1, Math.max(0, (isNaN(peerVolume) ? 1 : peerVolume) * masterOutputVolume));
+
+    const gainNode = getOutputGainNode(audioPlayer, volume);
+    if (gainNode) {
+        gainNode.gain.value = volume;
+        return;
+    }
+
+    if (canSetElementVolume()) {
+        audioPlayer.volume = volume;
+    } else {
+        audioPlayer.muted = volume === 0;
+    }
+}
+
+/**
+ * Check if HTMLMediaElement.volume is writable (it is read-only on iOS)
+ * @returns {boolean}
+ */
+function canSetElementVolume() {
+    if (elementVolumeWritable === undefined) {
+        const probe = document.createElement('audio');
+        try {
+            probe.volume = 0.5;
+        } catch {
+            // ignore, handled by the read back below
+        }
+        elementVolumeWritable = probe.volume === 0.5;
+    }
+    return elementVolumeWritable;
+}
+
+/**
+ * Get (lazily create) the shared AudioContext used for the output volume fallback
+ * @returns {AudioContext|null}
+ */
+function getOutputAudioContext() {
+    if (!outputAudioContext) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) return null;
+        outputAudioContext = new AudioContextClass();
+    }
+    if (outputAudioContext.state === 'suspended') {
+        outputAudioContext.resume().catch((err) => console.warn('Output AudioContext resume', err));
+    }
+    return outputAudioContext;
+}
+
+/**
+ * Get (lazily create) the gain node of a given audio element
+ * @param {HTMLAudioElement} elem
+ * @param {number} volume 0-1
+ * @returns {GainNode|null}
+ */
+function getOutputGainNode(elem, volume) {
+    if (elem._outputGainNode) return elem._outputGainNode;
+
+    // Web Audio routing is engaged lazily and only where HTMLMediaElement.volume is
+    // read-only (iOS), so the default full-volume output path stays untouched elsewhere.
+    if (volume >= 1 || elem._outputGainUnavailable || canSetElementVolume()) return null;
+
+    const audioContext = getOutputAudioContext();
+    if (!audioContext) {
+        elem._outputGainUnavailable = true;
+        return null;
+    }
+
+    try {
+        const source = audioContext.createMediaElementSource(elem);
+        const gainNode = audioContext.createGain();
+        source.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        elem._outputGainNode = gainNode;
+        return gainNode;
+    } catch (err) {
+        console.error('Create output gain node error', err);
+        elem._outputGainUnavailable = true;
+        return null;
     }
 }
 
@@ -13695,6 +14012,11 @@ function handleRoomAction(config, emit = false) {
                 sendToServer('roomAction', thisConfig);
                 handleRoomStatus(thisConfig);
                 break;
+            case 'joinLockOn':
+            case 'joinLockOff':
+                sendToServer('roomAction', thisConfig);
+                handleRoomStatus(thisConfig);
+                break;
             default:
                 break;
         }
@@ -13731,9 +14053,86 @@ function handleRoomStatus(config) {
             isRoomLocked = true;
             password == 'OK' ? joinToChannel() : handleRoomLocked();
             break;
+        case 'joinLockOn':
+            playSound('locked');
+            userLog(
+                'toast',
+                `${icons.user} ${peer_name} \n has 🔒 LOCKED the room, no new participants can join`,
+                'top-end'
+            );
+            isJoinLocked = true;
+            updateJoinLockButtons();
+            screenReaderAccessibility.announceMessage(`${peer_name} locked the room for new participants`);
+            break;
+        case 'joinLockOff':
+            userLog(
+                'toast',
+                `${icons.user} ${peer_name} \n has 🔓 UNLOCKED the room, new participants can join`,
+                'top-end'
+            );
+            isJoinLocked = false;
+            updateJoinLockButtons();
+            screenReaderAccessibility.announceMessage(`${peer_name} unlocked the room for new participants`);
+            break;
         default:
             break;
     }
+}
+
+/**
+ * Show the join lock or join unlock button according to the current room state
+ */
+function updateJoinLockButtons() {
+    const canLock = buttons.settings.showJoinLockBtn && (isPresenter || !isRulesActive);
+    elemDisplay(joinLockBtn, canLock && !isJoinLocked);
+    elemDisplay(joinUnlockBtn, canLock && isJoinLocked);
+}
+
+/**
+ * Ask the presenter to confirm the room lock/unlock for new participants
+ * @param {boolean} lock true to lock the room, false to unlock it
+ */
+function confirmJoinLock(lock) {
+    playSound('newMessage');
+
+    Swal.fire({
+        background: swBg,
+        imageUrl: images.locked,
+        title: lock ? 'Lock room?' : 'Unlock room?',
+        text: lock
+            ? 'Are you sure you want to lock the room? No new participants will be able to join from now on.'
+            : 'Are you sure you want to unlock the room? New participants will be able to join again.',
+        showDenyButton: true,
+        confirmButtonText: lock ? 'Lock room' : 'Unlock room',
+        denyButtonText: `Cancel`,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) handleRoomAction({ action: lock ? 'joinLockOn' : 'joinLockOff' }, true);
+    });
+}
+
+/**
+ * The room is locked by the host, new participants are not allowed to join
+ */
+function handleRoomJoinLocked() {
+    playSound('alert');
+
+    console.log('Room is Locked for new participants');
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        background: swBg,
+        position: 'center',
+        imageUrl: images.locked,
+        title: 'Oops, Room is Locked',
+        text: 'The host has locked the room, new participants are not allowed to join.',
+        confirmButtonText: `Ok`,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then(() => {
+        openURL('/newcall');
+    });
 }
 
 /**
@@ -15850,6 +16249,13 @@ function kickOut(peer_id) {
         imageUrl: images.leave,
         title: 'Kick out',
         text: `Are you sure you want to kick out ${pName}?`,
+        input: 'text',
+        inputPlaceholder: 'Reason (optional)',
+        inputAttributes: {
+            maxlength: 128,
+            autocapitalize: 'off',
+            autocorrect: 'off',
+        },
         showDenyButton: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
@@ -15863,6 +16269,7 @@ function kickOut(peer_id) {
                 peer_id: peer_id,
                 peer_uuid: myPeerUUID,
                 peer_name: myPeerName,
+                peer_kicked_reason: (result.value || '').trim(),
             });
         }
     });
@@ -15939,7 +16346,7 @@ function handleCaptionActions(config) {
 function handleKickedOut(config) {
     signalingSocket.disconnect();
 
-    const { peer_name } = config;
+    const { peer_name, peer_kicked_reason } = config;
 
     playSound('eject');
 
@@ -15954,6 +16361,7 @@ function handleKickedOut(config) {
         html: renderRoomTemplate('tpl-kicked-out-modal', {
             text: {
                 peerName: peer_name,
+                reason: peer_kicked_reason && peer_kicked_reason.trim() ? `Reason: ${peer_kicked_reason.trim()}` : '',
             },
         }),
         timer: 5000,
@@ -15964,7 +16372,7 @@ function handleKickedOut(config) {
                 const content = Swal.getHtmlContainer();
                 if (content) {
                     const b = content.querySelector('b');
-                    if (b) b.textContent = Swal.getTimerLeft();
+                    if (b) b.textContent = Math.ceil(Swal.getTimerLeft() / 1000);
                 }
             }, 100);
         },
@@ -15990,7 +16398,7 @@ function showAbout() {
     Swal.fire({
         background: swBg,
         position: 'center',
-        title: brand.about?.title && brand.about.title.trim() !== '' ? brand.about.title : 'WebRTC P2P v1.8.75',
+        title: brand.about?.title && brand.about.title.trim() !== '' ? brand.about.title : 'WebRTC P2P v1.9.01',
         imageUrl: brand.about?.imageUrl && brand.about.imageUrl.trim() !== '' ? brand.about.imageUrl : images.about,
         customClass: { image: 'img-about' },
         html: renderRoomTemplate('tpl-about-modal', {
@@ -16467,7 +16875,7 @@ async function playSpeaker(deviceId = null, name, path = '../sounds/') {
             if (typeof audioToPlay.setSinkId === 'function') {
                 await audioToPlay.setSinkId(selectedDeviceId);
             }
-            audioToPlay.volume = 0.5;
+            audioToPlay.volume = 0.5 * masterOutputVolume;
             await audioToPlay.play();
         } catch (err) {
             console.error('Cannot play test sound:', err);
@@ -16663,14 +17071,156 @@ function setupQuickDeviceSwitchDropdowns() {
         if (!toggleEl || !menuEl) return;
         menuEl.classList.remove('show');
         toggleEl.setAttribute('aria-expanded', 'false');
+        if (menuEl === audioMenu) audioMeterManager.stop();
     }
 
     function openMenu(toggleEl, menuEl, rebuildFn) {
         if (!toggleEl || !menuEl) return;
+        if (menuEl === audioMenu) audioMeterManager.active = true;
         if (typeof rebuildFn === 'function') rebuildFn();
         menuEl.classList.add('show');
         toggleEl.setAttribute('aria-expanded', 'true');
     }
+
+    function createDeviceAudioMeter() {
+        const meter = document.createElement('span');
+        meter.className = 'device-menu-audio-meter';
+        const barEls = [];
+        for (let i = 0; i < 8; i++) {
+            const bar = document.createElement('span');
+            bar.className = 'device-meter-bar';
+            meter.appendChild(bar);
+            barEls.push(bar);
+        }
+        return { meter, barEls };
+    }
+
+    // Live audio input level meters shown next to each microphone in the audio device menu.
+    // Uses a single AudioContext and one analyser per device; runs only while the menu is open.
+    const audioMeterManager = {
+        active: false,
+        rafId: null,
+        audioContext: null,
+        meters: new Map(), // deviceId -> { stream, source, analyser, dataArray }
+        barTargets: new Map(), // deviceId -> [barEl, ...]
+
+        async ensureContext() {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            if (!this.audioContext || this.audioContext.state === 'closed') {
+                this.audioContext = new AC();
+            }
+            if (this.audioContext.state === 'suspended') {
+                try {
+                    await this.audioContext.resume();
+                } catch (err) {
+                    /* ignore */
+                }
+            }
+            return this.audioContext;
+        },
+
+        setBarTargets(entries) {
+            this.barTargets.clear();
+            entries.forEach(({ deviceId, barEls }) => {
+                if (deviceId) this.barTargets.set(deviceId, barEls);
+            });
+        },
+
+        async start(entries) {
+            if (!(window.AudioContext || window.webkitAudioContext)) return;
+            this.active = true;
+            this.setBarTargets(entries);
+            for (const { deviceId } of entries) {
+                if (deviceId && !this.meters.has(deviceId)) {
+                    await this.createMeter(deviceId);
+                }
+            }
+            if (this.active && !this.rafId) {
+                this.rafId = requestAnimationFrame(() => this.tick());
+            }
+        },
+
+        async createMeter(deviceId) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        deviceId: { exact: deviceId },
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false,
+                    },
+                });
+                if (!this.active) {
+                    stream.getTracks().forEach((t) => t.stop());
+                    return;
+                }
+                const ctx = await this.ensureContext();
+                if (!ctx) {
+                    stream.getTracks().forEach((t) => t.stop());
+                    return;
+                }
+                const source = ctx.createMediaStreamSource(stream);
+                const analyser = ctx.createAnalyser();
+                analyser.fftSize = 256;
+                analyser.smoothingTimeConstant = 0.6;
+                source.connect(analyser);
+                const dataArray = new Uint8Array(analyser.fftSize);
+                this.meters.set(deviceId, { stream, source, analyser, dataArray });
+            } catch (err) {
+                console.warn('Audio meter init failed for device', deviceId, err);
+            }
+        },
+
+        tick() {
+            if (!this.active) return;
+            this.meters.forEach((meter, deviceId) => {
+                const barEls = this.barTargets.get(deviceId);
+                if (!barEls || !barEls.length) return;
+                meter.analyser.getByteTimeDomainData(meter.dataArray);
+                let sum = 0;
+                for (let i = 0; i < meter.dataArray.length; i++) {
+                    const v = (meter.dataArray[i] - 128) / 128;
+                    sum += v * v;
+                }
+                const rms = Math.sqrt(sum / meter.dataArray.length);
+                const level = Math.min(1, rms * 3.5);
+                const activeBars = Math.round(level * barEls.length);
+                barEls.forEach((bar, i) => bar.classList.toggle('active', i < activeBars));
+            });
+            this.rafId = requestAnimationFrame(() => this.tick());
+        },
+
+        stop() {
+            this.active = false;
+            if (this.rafId) {
+                cancelAnimationFrame(this.rafId);
+                this.rafId = null;
+            }
+            this.meters.forEach((meter) => {
+                try {
+                    meter.source.disconnect();
+                } catch (err) {
+                    /* ignore */
+                }
+                try {
+                    meter.stream.getTracks().forEach((t) => t.stop());
+                } catch (err) {
+                    /* ignore */
+                }
+            });
+            this.meters.clear();
+            this.barTargets.clear();
+            if (this.audioContext && this.audioContext.state !== 'closed') {
+                try {
+                    this.audioContext.close();
+                } catch (err) {
+                    /* ignore */
+                }
+            }
+            this.audioContext = null;
+        },
+    };
 
     function toggleMenu(toggleEl, menuEl, rebuildFn) {
         const open = isMenuOpen(menuEl);
@@ -16703,7 +17253,43 @@ function setupQuickDeviceSwitchDropdowns() {
         menuEl.appendChild(divider);
     }
 
-    function appendSelectOptions(menuEl, selectEl, emptyLabel, rebuildFn) {
+    function appendNoiseSuppressionToggle(menuEl) {
+        if (!menuEl) return;
+
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'app-dropdown-action device-menu-toggle-btn';
+
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-ear-listen';
+
+        const labelSpan = document.createElement('span');
+        labelSpan.className = 'device-menu-label';
+        labelSpan.textContent = ' Noise Suppression';
+
+        const toggle = document.createElement('input');
+        toggle.id = 'audioMenuNoiseSuppression';
+        toggle.className = 'toggle';
+        toggle.type = 'checkbox';
+        toggle.checked = !!lsSettings.mic_noise_suppression;
+        // Clicks are handled on the row to keep the whole item tappable.
+        toggle.style.pointerEvents = 'none';
+
+        row.appendChild(icon);
+        row.appendChild(labelSpan);
+        row.appendChild(toggle);
+
+        row.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            row.disabled = true;
+            await applyNoiseSuppression(!lsSettings.mic_noise_suppression);
+            row.disabled = false;
+        });
+
+        menuEl.appendChild(row);
+    }
+
+    function appendSelectOptions(menuEl, selectEl, emptyLabel, rebuildFn, meterCollector) {
         if (!menuEl || !selectEl) {
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -16740,13 +17326,23 @@ function setupQuickDeviceSwitchDropdowns() {
                 icon.className = 'fas fa-check';
                 icon.style.marginRight = '0.5em';
                 btn.appendChild(icon);
-                btn.appendChild(document.createTextNode(` ${label}`));
             } else {
                 const spacer = document.createElement('span');
                 spacer.style.display = 'inline-block';
                 spacer.style.width = '1.25em';
                 btn.appendChild(spacer);
-                btn.appendChild(document.createTextNode(label));
+            }
+
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'device-menu-label';
+            labelSpan.textContent = isSelected ? ` ${label}` : label;
+            btn.appendChild(labelSpan);
+
+            // Live audio input level meter (microphones only)
+            if (meterCollector) {
+                const { meter, barEls } = createDeviceAudioMeter();
+                btn.appendChild(meter);
+                meterCollector.push({ deviceId: opt.value, barEls });
             }
 
             btn.addEventListener('click', () => {
@@ -16791,7 +17387,16 @@ function setupQuickDeviceSwitchDropdowns() {
         audioMenu.innerHTML = '';
 
         appendMenuHeader(audioMenu, 'fas fa-microphone', 'Microphones');
-        appendSelectOptions(audioMenu, audioInputSelect, 'No microphones found', rebuildAudioMenu);
+        const audioMeterEntries = [];
+        appendSelectOptions(audioMenu, audioInputSelect, 'No microphones found', rebuildAudioMenu, audioMeterEntries);
+        if (audioMeterManager.active) audioMeterManager.start(audioMeterEntries);
+
+        // Noise suppression toggle (mirrors the audio settings switch)
+        if (buttons.settings.customNoiseSuppression && isRNNoiseSupported) {
+            appendMenuDivider(audioMenu);
+            appendMenuHeader(audioMenu, 'fas fa-ear-listen', 'Microphone Effects');
+            appendNoiseSuppressionToggle(audioMenu);
+        }
 
         appendMenuDivider(audioMenu);
 
@@ -16803,9 +17408,44 @@ function setupQuickDeviceSwitchDropdowns() {
             btn.disabled = true;
             btn.textContent = 'Speaker selection not supported';
             audioMenu.appendChild(btn);
-            return;
+        } else {
+            appendSelectOptions(audioMenu, audioOutputSelect, 'No speakers found', rebuildAudioMenu);
         }
-        appendSelectOptions(audioMenu, audioOutputSelect, 'No speakers found', rebuildAudioMenu);
+
+        // Master output volume
+        const volumeRow = document.createElement('div');
+        volumeRow.className = 'device-menu-volume-row';
+
+        const volumeIcon = document.createElement('i');
+        volumeIcon.className = 'fas fa-volume-high';
+        volumeRow.appendChild(volumeIcon);
+
+        const volumeSlider = document.createElement('input');
+        volumeSlider.id = 'audioMenuSpeakerVolume';
+        volumeSlider.className = 'output-volume-slider';
+        volumeSlider.type = 'range';
+        volumeSlider.min = '0';
+        volumeSlider.max = '100';
+        volumeSlider.step = '1';
+        volumeSlider.value = speakerVolume ? speakerVolume.value : 100;
+        volumeRow.appendChild(volumeSlider);
+
+        const volumeValue = document.createElement('span');
+        volumeValue.id = 'audioMenuSpeakerVolumeValue';
+        volumeValue.className = 'output-volume-value';
+        volumeValue.textContent = `${volumeSlider.value}%`;
+        volumeRow.appendChild(volumeValue);
+
+        volumeSlider.addEventListener('input', () => {
+            setSpeakerVolume(volumeSlider.value);
+        });
+        volumeSlider.addEventListener('change', () => {
+            lsSettings.speaker_volume = Number(volumeSlider.value);
+            lS.setSettings(lsSettings);
+        });
+        volumeRow.addEventListener('click', (e) => e.stopPropagation());
+
+        audioMenu.appendChild(volumeRow);
 
         // Add action buttons
         appendMenuDivider(audioMenu);
@@ -16817,7 +17457,7 @@ function setupQuickDeviceSwitchDropdowns() {
         const testIcon = document.createElement('i');
         testIcon.className = 'fa-solid fa-circle-play';
         testBtn.appendChild(testIcon);
-        testBtn.appendChild(document.createTextNode(' Test Speaker'));
+        testBtn.appendChild(document.createTextNode(' Test'));
         testBtn.addEventListener('click', () => playSpeaker(audioOutputSelect?.value, 'speaker'));
         audioMenu.appendChild(testBtn);
 

@@ -257,9 +257,14 @@ body {
     font-size: 60px;
     font-family: 'Montserrat';
 }
-#loadingDiv pre {
+#loadingDiv pre,
+#loadingDiv p {
     padding: 5px;
     font-family: 'Montserrat';
+}
+#loadingDiv p {
+    max-width: 35ch;
+    margin-inline: auto;
 }
 
 /* Custom CSS spinner */
@@ -755,6 +760,129 @@ body {
     text-align: center;
 }
 
+/* Noise suppression toggle row inside the audio device menu */
+#bottomButtons #audioMenu .device-menu-toggle-btn {
+    gap: 8px;
+}
+
+#bottomButtons #audioMenu .device-menu-toggle-btn i {
+    width: 18px;
+    text-align: center;
+}
+
+#bottomButtons #audioMenu .device-menu-toggle-btn .toggle {
+    flex: 0 0 auto;
+    margin-left: auto;
+}
+
+/* Live audio input level meter inside the audio device menu */
+#bottomButtons #audioMenu button .device-menu-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.device-menu-audio-meter {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    height: 14px;
+    margin-left: auto;
+    padding-left: 12px;
+    flex: 0 0 auto;
+    pointer-events: none;
+}
+
+.device-menu-audio-meter .device-meter-bar {
+    width: 3px;
+    height: 100%;
+    border-radius: 2px;
+    background-color: rgba(255, 255, 255, 0.18);
+    transition: background-color 0.08s ease;
+}
+
+.device-menu-audio-meter .device-meter-bar.active {
+    background-color: #19bb5c;
+}
+
+/* Settings / device menu - speaker output volume */
+.output-volume-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+/* Speaker select + test button on the same line */
+.speaker-select-row {
+    display: flex;
+    align-items: stretch;
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+}
+
+#mySettings .speaker-select-row select {
+    flex: 1;
+    min-width: 0;
+    max-width: none;
+    margin-top: 0;
+    height: 44px;
+    padding: 0 10px;
+    box-sizing: border-box;
+}
+
+.speaker-select-row .buttons {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    float: none;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    height: 44px;
+    margin: 0;
+    padding: 0 14px;
+    border-radius: 8px;
+    box-sizing: border-box;
+}
+
+#mySettings .speaker-select-row .buttons i,
+#mySettings .speaker-select-row .buttons p {
+    margin: 0;
+    padding: 0;
+    line-height: 1;
+}
+
+.output-volume-slider {
+    flex: 1;
+    min-width: 0;
+    height: 5px;
+    accent-color: #3498db;
+    background-color: var(--body-bg);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.output-volume-value {
+    flex: 0 0 auto;
+    min-width: 42px;
+    text-align: right;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+#bottomButtons #audioMenu .device-menu-volume-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px;
+    color: #fff;
+    user-select: none;
+}
+
 #bottomButtons button:hover {
     background: var(--body-bg);
     transform: var(--btns-hover-scale);
@@ -948,6 +1076,11 @@ body {
     padding: 12px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     background: rgba(0, 0, 0, 0.2);
+}
+
+/* Whisper mode hides the language selects; keep the play/stop button on the right. */
+.caption-inputarea.caption-inputarea-whisper {
+    justify-content: flex-end;
 }
 
 .caption-inputarea select {
@@ -3006,9 +3139,60 @@ button {
     height: 256px;
 }
 
-.kicked-out-modal-alert-title,
+.kicked-out-modal {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--ds-space-3);
+    padding: var(--ds-space-2) 0;
+}
+
+.kicked-out-modal-text {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.5;
+    color: var(--ds-neutral-100);
+}
+
+.kicked-out-modal-peer {
+    font-weight: 700;
+    color: var(--ds-danger);
+}
+
+.kicked-out-modal-reason {
+    margin: 0;
+    max-width: 100%;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ds-neutral-300);
+    font-style: italic;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+.kicked-out-modal-reason:empty {
+    display: none;
+}
+
+.kicked-out-modal-redirect {
+    margin: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--ds-space-2);
+    padding: var(--ds-space-2) var(--ds-space-4);
+    border-radius: var(--ds-radius-full);
+    background: rgba(231, 76, 60, 0.12);
+    color: var(--ds-neutral-300);
+    font-size: 14px;
+}
+
 .kicked-out-modal-alert-time {
-    color: #ff2d00;
+    display: inline-block;
+    min-width: 1.2em;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    font-weight: 700;
+    color: var(--ds-danger);
 }
 
 /*--------------------------------------------------------------
@@ -3022,6 +3206,7 @@ button {
     margin: auto;
     padding: 10px;
     width: 50%;
+    height: auto;
     background: var(--body-bg);
     box-shadow: var(--box-shadow);
     border: var(--border);
@@ -3525,7 +3710,9 @@ button {
 #ejectEveryoneBtn,
 #roomSendEmailBtn,
 #lockRoomBtn,
-#unlockRoomBtn {
+#unlockRoomBtn,
+#joinLockBtn,
+#joinUnlockBtn {
     padding: 10px;
     font-size: 0.9rem;
     border: var(--border);
@@ -3539,7 +3726,9 @@ button {
 #myProfileAvatarResetBtn:hover,
 #roomSendEmailBtn:hover,
 #lockRoomBtn:hover,
-#unlockRoomBtn:hover {
+#unlockRoomBtn:hover,
+#joinLockBtn:hover,
+#joinUnlockBtn:hover {
     background: var(--body-bg);
     transform: translateY(-3px);
     transition: all 0.3s ease-in-out;
@@ -3700,7 +3889,7 @@ button {
     position: relative;
     padding: 0px 20px 0px 0px; /* top right bottom left */
     width: 65%;
-    max-height: 540px;
+    height: 100%;
     overflow-y: auto;
     overflow-x: hidden;
 }
