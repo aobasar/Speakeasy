@@ -21,7 +21,6 @@
         "IP address associated with the ICE candidate": "IP address associated with the ICE candidate",
         "Keep buttons always visible": "Keep buttons always visible",
         "Leave meeting": "Leave meeting",
-        "Leave this room": "Leave this room",
         "Lower your hand (H)": "Lower your hand (H)",
         "Markdown": "Markdown",
         "Maximize": "Maximize",
@@ -472,7 +471,7 @@
         "Time Limit Reached": "Time Limit Reached",
         "Unlock room?": "Unlock room?",
         "Username": "Username",
-        "WebRTC P2P v1.9.05": "WebRTC P2P v1.9.05",
+        "WebRTC P2P v1.9.11": "WebRTC P2P v1.9.11",
         "Whiteboard Shortcuts": "Whiteboard Shortcuts",
         "Yes": "Yes"
     },

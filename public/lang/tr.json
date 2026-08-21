@@ -21,7 +21,6 @@
         "IP address associated with the ICE candidate": "ICE adayıyla ilişkili IP adresi",
         "Keep buttons always visible": "Düğmeleri her zaman görünür tut",
         "Leave meeting": "Toplantıdan ayrıl",
-        "Leave this room": "Bu odadan ayrıl",
         "Lower your hand (H)": "Elini indir (H)",
         "Markdown": "Markdown",
         "Maximize": "Büyüt",
@@ -470,7 +469,7 @@
         "Time Limit Reached": "Süre sınırına ulaşıldı",
         "Unlock room?": "Oda kilidi açılsın mı?",
         "Username": "Kullanıcı adı",
-        "WebRTC P2P v1.9.05": "WebRTC P2P v1.9.05",
+        "WebRTC P2P v1.9.11": "WebRTC P2P v1.9.11",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Yes": "Evet"
     },

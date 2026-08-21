@@ -21,7 +21,6 @@
         "IP address associated with the ICE candidate": "عنوان IP المرتبط بمرشح ICE",
         "Keep buttons always visible": "إبقاء الأزرار مرئية دائمًا",
         "Leave meeting": "مغادرة الاجتماع",
-        "Leave this room": "اترك هذه الغرفة",
         "Lower your hand (H)": "خفض يدك (H)",
         "Markdown": "Markdown",
         "Maximize": "تكبير",
@@ -470,7 +469,7 @@
         "Time Limit Reached": "تم بلوغ الحد الزمني",
         "Unlock room?": "إلغاء قفل الغرفة؟",
         "Username": "اسم المستخدم",
-        "WebRTC P2P v1.9.05": "WebRTC P2P v1.9.05",
+        "WebRTC P2P v1.9.11": "WebRTC P2P v1.9.11",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Yes": "نعم"
     },

@@ -15,7 +15,7 @@
  * @license For commercial use or closed source, contact us at license.mirotalk@gmail.com or purchase directly from CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-p2p-webrtc-realtime-video-conferences/38376661
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.05
+ * @version 1.9.11
  *
  */
 
@@ -976,7 +976,6 @@ function refreshMainButtonsToolTipPlacement() {
     setTippy(chatRoomBtn, 'Open the chat (C)', bottomButtonsPlacement);
     setTippy(participantsBtn, 'Show participants', bottomButtonsPlacement);
     setTippy(mySettingsBtn, 'Open the settings (O)', bottomButtonsPlacement);
-    setTippy(leaveRoomBtn, 'Leave this room', bottomButtonsPlacement);
 }
 
 /**
@@ -1611,6 +1610,8 @@ function handleServerInfo(config) {
     isJoinLocked = join_locked === true;
     console.log('New connection - presenter status from server:', isPresenter);
     isPeerPresenter.innerText = isPresenter;
+    setPresenterBadge(myVideoPeerName, isPresenter);
+    setPresenterBadge(getId('myScreenPeerName'), isPresenter);
 
     // Peer identified if presenter or not then....
     handleShortcuts();
@@ -4483,6 +4484,7 @@ async function loadLocalMedia(stream, kind) {
             myScreenPeerName.setAttribute('id', 'myScreenPeerName');
             myScreenPeerName.className = 'videoPeerName notranslate fadein';
             myScreenPeerName.innerText = myPeerName + ' (me)';
+            setPresenterBadge(myScreenPeerName, isPresenter);
 
             // my screen to image
             myScreenToImgBtn.setAttribute('id', 'myScreenToImgBtn');
@@ -4672,6 +4674,7 @@ async function loadRemoteMediaStream(stream, peers, peer_id, kind) {
     const peer_hand_status = peers[peer_id]['peer_hand_status'];
     const peer_rec_status = peers[peer_id]['peer_rec_status'];
     const peer_privacy_status = peers[peer_id]['peer_privacy_status'];
+    const peer_presenter = peers[peer_id]['peer_presenter'];
 
     if (stream) console.log('LOAD REMOTE MEDIA STREAM TRACKS - PeerName:[' + peer_name + ']', stream.getTracks());
 
@@ -4714,6 +4717,7 @@ async function loadRemoteMediaStream(stream, peers, peer_id, kind) {
             // remote peer name element
             remotePeerName.setAttribute('id', peer_id + '_name');
             remotePeerName.className = 'videoPeerName notranslate fadein';
+            setPresenterBadge(remotePeerName, peer_presenter);
 
             const peerVideoText = document.createTextNode(peer_name);
             remotePeerName.appendChild(peerVideoText);
@@ -5046,6 +5050,7 @@ async function loadRemoteMediaStream(stream, peers, peer_id, kind) {
             remoteScreenPeerName.setAttribute('id', peer_id + '_screen_name');
             remoteScreenPeerName.className = 'videoPeerName notranslate fadein';
             remoteScreenPeerName.appendChild(document.createTextNode(peer_name + ' (screen)'));
+            setPresenterBadge(remoteScreenPeerName, peer_presenter);
 
             remoteScreenPrivateMsgBtn.setAttribute('id', peer_id + '_screen_privateMsg');
             remoteScreenPrivateMsgBtn.className = className.msgPrivate;
@@ -5521,6 +5526,16 @@ function genAvatarSvg(peerName, avatarImgSize) {
         </text>
     </svg>`;
     return 'data:image/svg+xml,' + svg.replace(/#/g, '%23').replace(/"/g, "'").replace(/&/g, '&amp;');
+}
+
+/**
+ * Show/hide the green shield badge marking the meeting presenter
+ * @param {HTMLElement} element peer name or participant list entry
+ * @param {boolean} presenter
+ */
+function setPresenterBadge(element, presenter) {
+    if (!element) return;
+    element.classList.toggle('isPresenter', !!presenter);
 }
 
 /**
@@ -7725,27 +7740,64 @@ function setAboutBtn() {
 /**
  * Leave room button click event
  */
+let exitMenuHideTimer = null;
+
 function setLeaveRoomBtn() {
     leaveRoomBtn.addEventListener('click', (e) => {
-        if (e && e.shiftKey) return leaveRoom();
-        if (!isPresenter) return leaveRoom();
-        toggleExitMenu();
+        if ((e && e.shiftKey) || !isPresenter) {
+            hideExitMenu();
+            return leaveRoom();
+        }
+        if (isMobileDevice || isTabletDevice) {
+            exitMenu && !exitMenu.classList.contains('hidden') ? hideExitMenu() : showExitMenu();
+            return;
+        }
+        hideExitMenu();
+        leaveRoom();
     });
     if (exitLeaveBtn) exitLeaveBtn.onclick = handleExitLeave;
     if (exitLeaveAllBtn) exitLeaveAllBtn.onclick = handleExitLeaveForAll;
+    if (exitDropdown && isDesktopDevice) {
+        exitDropdown.addEventListener('mouseenter', showExitMenu);
+        exitDropdown.addEventListener('mouseleave', scheduleHideExitMenu);
+    }
     document.addEventListener('click', handleExitMenuOutsideClick);
 }
 
 /**
- * Toggle the exit dropdown menu. The "End room for all" entry is
+ * Show the exit dropdown menu. The "End room for all" entry is
  * only available to the presenter.
  */
-function toggleExitMenu() {
-    if (!exitMenu) return leaveRoom();
-    if (exitLeaveAllBtn) {
-        isPresenter ? exitLeaveAllBtn.classList.remove('hidden') : exitLeaveAllBtn.classList.add('hidden');
+function showExitMenu() {
+    if (!exitMenu || !isPresenter) return;
+    if (exitMenuHideTimer) {
+        clearTimeout(exitMenuHideTimer);
+        exitMenuHideTimer = null;
     }
-    exitMenu.classList.toggle('hidden');
+    if (exitLeaveAllBtn) {
+        exitLeaveAllBtn.classList.remove('hidden');
+    }
+    exitMenu.classList.remove('hidden');
+}
+
+/**
+ * Hide the exit dropdown menu after a short delay so the pointer can
+ * travel from the button to the menu without it closing.
+ */
+function scheduleHideExitMenu() {
+    if (exitMenuHideTimer) clearTimeout(exitMenuHideTimer);
+    exitMenuHideTimer = setTimeout(hideExitMenu, 400);
+}
+
+/**
+ * Hide the exit dropdown menu.
+ */
+function hideExitMenu() {
+    if (exitMenuHideTimer) {
+        clearTimeout(exitMenuHideTimer);
+        exitMenuHideTimer = null;
+    }
+    if (exitMenu) exitMenu.classList.add('hidden');
 }
 
 function handleExitLeave() {
@@ -11927,6 +11979,7 @@ async function msgerAddPeers(peers) {
                 msgerCPList.scrollTop += 500;
 
                 const msgerPrivateBtn = getId(peer_id + '_pMsgBtn');
+                setPresenterBadge(msgerPrivateBtn, peers[peer_id]['peer_presenter']);
                 const msgerPrivateKickOutBtn = getId(peer_id + '_pKickOut');
                 const msgerPrivateToggleAudioBtn = getId(peer_id + '_pToggleAudio');
                 const msgerPrivateToggleVideoBtn = getId(peer_id + '_pToggleVideo');
@@ -16398,7 +16451,7 @@ function showAbout() {
     Swal.fire({
         background: swBg,
         position: 'center',
-        title: brand.about?.title && brand.about.title.trim() !== '' ? brand.about.title : 'WebRTC P2P v1.9.05',
+        title: brand.about?.title && brand.about.title.trim() !== '' ? brand.about.title : 'WebRTC P2P v1.9.11',
         imageUrl: brand.about?.imageUrl && brand.about.imageUrl.trim() !== '' ? brand.about.imageUrl : images.about,
         customClass: { image: 'img-about' },
         html: renderRoomTemplate('tpl-about-modal', {
