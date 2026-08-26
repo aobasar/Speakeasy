@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk P2P v.1.9.11 - Configuration File
+ * MiroTalk P2P v.1.9.16 - Configuration File
  * ==============================================
  *
  * This file is the central configuration source.
@@ -384,7 +384,6 @@ module.exports = {
         html: {
             topSponsors: true,
             features: true,
-            browsers: true,
             teams: true, // please keep me always true ;)
             tryEasier: true,
             poweredBy: true,
