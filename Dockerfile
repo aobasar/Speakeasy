@@ -27,6 +27,13 @@ RUN npm ci --omit=dev --silent \
 COPY app app
 COPY public public
 
+# AOB Speakeasy branding: swap MiroTalk's footer for ours at build time.
+# The view files above are kept byte-identical to upstream on purpose — that is
+# what stops the daily upstream-sync merge from conflicting in six HTML files
+# every release. See aob-brand/README.md.
+COPY aob-brand aob-brand
+RUN node aob-brand/apply.js
+
 # Run as the non-root "node" user (uid/gid 1000) shipped with the base image
 RUN chown -R node:node /src
 USER node
